@@ -13,7 +13,6 @@
 
 @property (nonatomic, assign) BOOL errorLogsSwitch; // Default is YES.
 
-
 - (instancetype)initWithDirectory:(NSString *)directory;
 
 - (BOOL)dbReset;
