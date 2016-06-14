@@ -10,7 +10,7 @@
 #import "CZMemoryCache.h"
 #import "CZFilePath.h"
 #import "CZKVDataBase.h"
-#import "CZKeyValueItem.h"
+#import "CZKVItem.h"
 
 @interface AppDelegate ()
 
@@ -80,7 +80,7 @@
     
     //[_dataBase dbDeleteItemWithKey:@"test"];
     
-    //    CZKeyValueItem *zxmData = [_dataBase dbGetItemForKey:@"zxm"];
+    //    CZKVItem *zxmData = [_dataBase dbGetItemForKey:@"zxm"];
     //    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:zxmData.value];
     //    NSDictionary *zxmInfo = [unarchiver decodeObjectForKey:@"person"];
     

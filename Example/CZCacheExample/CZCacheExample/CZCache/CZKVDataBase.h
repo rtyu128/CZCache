@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class CZKeyValueItem;
+@class CZKVItem;
 @interface CZKVDataBase : NSObject
 
 @property (nonatomic, assign) BOOL errorLogsSwitch; // Default is YES.
@@ -28,7 +28,7 @@
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key;
 
-- (CZKeyValueItem *)dbGetItemForKey:(NSString *)key;
+- (CZKVItem *)dbGetItemForKey:(NSString *)key;
 
 - (NSData *)dbGetValueForKey:(NSString *)key;
 

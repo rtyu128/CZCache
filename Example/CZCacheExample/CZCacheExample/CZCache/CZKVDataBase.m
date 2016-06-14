@@ -7,7 +7,7 @@
 //
 
 #import "CZKVDataBase.h"
-#import "CZKeyValueItem.h"
+#import "CZKVItem.h"
 #import <UIKit/UIKit.h>
 #import <time.h>
 
@@ -243,14 +243,14 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     return YES;
 }
 
-- (CZKeyValueItem *)dbGetItemForKey:(NSString *)key
+- (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
     NSString *sqlStr = @"select key, value_data, filename, size, last_modified_time from KVTable where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
     
-    CZKeyValueItem *item = nil;
+    CZKVItem *item = nil;
     int result = sqlite3_step(stmt);
     if (result == SQLITE_ROW) {
         item = [self dbGetItemFromStmt:stmt];
@@ -263,7 +263,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     return item;
 }
 
-- (CZKeyValueItem *)dbGetItemFromStmt:(sqlite3_stmt *)stmt
+- (CZKVItem *)dbGetItemFromStmt:(sqlite3_stmt *)stmt
 {
     int i = 0;
     char *key = (char *)sqlite3_column_text(stmt, i++);
@@ -273,7 +273,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     int size = sqlite3_column_int(stmt, i++);
     int lastModifiedTime = sqlite3_column_int(stmt, i++);
     
-    CZKeyValueItem *item = [[CZKeyValueItem alloc] init];
+    CZKVItem *item = [[CZKVItem alloc] init];
     if (key) item.key = [NSString stringWithUTF8String:key];
     if (valueData && valueDataSize > 0) item.value = [NSData dataWithBytes:valueData length:valueDataSize];
     if (filename && *filename != 0) item.filename = [NSString stringWithUTF8String:filename];

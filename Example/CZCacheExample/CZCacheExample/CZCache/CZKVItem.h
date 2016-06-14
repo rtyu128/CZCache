@@ -1,5 +1,5 @@
 //
-//  CZKeyValueItem.h
+//  CZKVItem.h
 //  CZCache
 //
 //  Created by Anchor on 16/6/13.
@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CZKeyValueItem : NSObject
+@interface CZKVItem : NSObject
 
 @property (nonatomic, strong) NSString *key;
 @property (nonatomic, strong) NSData *value;
