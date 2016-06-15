@@ -25,8 +25,6 @@ static NSString *const kDataBaseShmFileName = @"cacheDataBase.sqlite-shm";
 static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 
-
-
 @implementation CZKVDataBase {
     NSString *storePath;
     NSString *storeDirectory;
