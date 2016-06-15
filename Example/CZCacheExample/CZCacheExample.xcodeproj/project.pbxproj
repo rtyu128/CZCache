@@ -21,6 +21,7 @@
 		E8D982201D10E61A00E6BE47 /* CZKVDataBase.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821B1D10E61A00E6BE47 /* CZKVDataBase.m */; };
 		E8D982211D10E61A00E6BE47 /* CZKVItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821D1D10E61A00E6BE47 /* CZKVItem.m */; };
 		E8D982221D10E61A00E6BE47 /* CZKVStore.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821F1D10E61A00E6BE47 /* CZKVStore.m */; };
+		E8D982251D1132C100E6BE47 /* CZDiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D982241D1132C100E6BE47 /* CZDiskCache.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,8 @@
 		E8D9821D1D10E61A00E6BE47 /* CZKVItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZKVItem.m; sourceTree = "<group>"; };
 		E8D9821E1D10E61A00E6BE47 /* CZKVStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZKVStore.h; sourceTree = "<group>"; };
 		E8D9821F1D10E61A00E6BE47 /* CZKVStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZKVStore.m; sourceTree = "<group>"; };
+		E8D982231D1132C100E6BE47 /* CZDiskCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZDiskCache.h; sourceTree = "<group>"; };
+		E8D982241D1132C100E6BE47 /* CZDiskCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZDiskCache.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +171,8 @@
 				E8D982171D10E60E00E6BE47 /* CZFilePath.m */,
 				E86593711D1011DB0095A9D2 /* CZMemoryCache.h */,
 				E86593721D1011DB0095A9D2 /* CZMemoryCache.m */,
+				E8D982231D1132C100E6BE47 /* CZDiskCache.h */,
+				E8D982241D1132C100E6BE47 /* CZDiskCache.m */,
 			);
 			path = CZCache;
 			sourceTree = "<group>";
@@ -319,6 +324,7 @@
 				E8D982221D10E61A00E6BE47 /* CZKVStore.m in Sources */,
 				E86593761D1011DB0095A9D2 /* CZMemoryCache.m in Sources */,
 				E865933A1D10112B0095A9D2 /* AppDelegate.m in Sources */,
+				E8D982251D1132C100E6BE47 /* CZDiskCache.m in Sources */,
 				E8D982211D10E61A00E6BE47 /* CZKVItem.m in Sources */,
 				E86593371D10112B0095A9D2 /* main.m in Sources */,
 				E8D982201D10E61A00E6BE47 /* CZKVDataBase.m in Sources */,

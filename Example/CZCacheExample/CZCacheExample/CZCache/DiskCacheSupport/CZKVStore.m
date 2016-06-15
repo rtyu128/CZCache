@@ -178,7 +178,7 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
     return value;
 }
 
-- (BOOL)containsItemForKey:(NSString *)key
+- (BOOL)containItemForKey:(NSString *)key
 {
     return key.length > 0 ? [db dbGetItemCountForKey:key] > 0 : NO;
 }
