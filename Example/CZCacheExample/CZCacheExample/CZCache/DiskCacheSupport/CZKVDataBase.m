@@ -320,6 +320,22 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     return nil;
 }
 
+- (int)dbGetItemCountForKey:(NSString *)key
+{
+    NSString *sqlStr = @"select count(key) from KVTable where key = ?;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return -1;
+    sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
+    
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_ROW) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database query error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        return -1;
+    }
+    return sqlite3_column_int(stmt, 0);
+}
+
 - (int)dbGetTotalItemSize
 {
     NSString *sqlStr = @"select sum(size) from KVTable;";
