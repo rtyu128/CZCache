@@ -10,7 +10,6 @@
 #import "CZKVItem.h"
 #import "CZKVDataBase.h"
 
-
 static NSString *const kValueFileDirectoryName = @"value";
 static NSString *const kValueFileTrashDirectoryName = @"value_trash";
 
@@ -178,7 +177,7 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
     return value;
 }
 
-- (BOOL)containItemForKey:(NSString *)key
+- (BOOL)containsItemForKey:(NSString *)key
 {
     return key.length > 0 ? [db dbGetItemCountForKey:key] > 0 : NO;
 }

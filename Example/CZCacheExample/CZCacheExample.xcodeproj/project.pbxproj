@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E801A16F1D115E5A00A4FB2F /* CZCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E801A16E1D115E5A00A4FB2F /* CZCache.m */; };
 		E86593371D10112B0095A9D2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E86593361D10112B0095A9D2 /* main.m */; };
 		E865933A1D10112B0095A9D2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E86593391D10112B0095A9D2 /* AppDelegate.m */; };
 		E865933D1D10112B0095A9D2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E865933C1D10112B0095A9D2 /* ViewController.m */; };
@@ -42,6 +43,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E801A16D1D115E5A00A4FB2F /* CZCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZCache.h; sourceTree = "<group>"; };
+		E801A16E1D115E5A00A4FB2F /* CZCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZCache.m; sourceTree = "<group>"; };
 		E86593321D10112B0095A9D2 /* CZCacheExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CZCacheExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E86593361D10112B0095A9D2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E86593381D10112B0095A9D2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -167,6 +170,8 @@
 			isa = PBXGroup;
 			children = (
 				E8D982191D10E61A00E6BE47 /* DiskCacheSupport */,
+				E801A16D1D115E5A00A4FB2F /* CZCache.h */,
+				E801A16E1D115E5A00A4FB2F /* CZCache.m */,
 				E8D982161D10E60E00E6BE47 /* CZFilePath.h */,
 				E8D982171D10E60E00E6BE47 /* CZFilePath.m */,
 				E86593711D1011DB0095A9D2 /* CZMemoryCache.h */,
@@ -329,6 +334,7 @@
 				E86593371D10112B0095A9D2 /* main.m in Sources */,
 				E8D982201D10E61A00E6BE47 /* CZKVDataBase.m in Sources */,
 				E8D982181D10E60E00E6BE47 /* CZFilePath.m in Sources */,
+				E801A16F1D115E5A00A4FB2F /* CZCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

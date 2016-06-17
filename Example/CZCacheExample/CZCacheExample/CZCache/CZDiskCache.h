@@ -23,14 +23,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property NSUInteger sizeLimit;
 
-@property BOOL errorLogsSwitch;
+//@property BOOL errorLogsSwitch;
 
 - (nullable instancetype)initWithPath:(NSString *)path;
 - (nullable instancetype)initWithPath:(NSString *)path dbStoreThreshold:(NSUInteger) threshold;
 
 - (nullable id<NSCoding>)objectForKey:(NSString *)key;
 - (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key;
-- (BOOL)constainObjectForKey:(NSString *)key;
+- (BOOL)containsObjectForKey:(NSString *)key;
 - (void)removeObjectForKey:(NSString *)key;
 - (void)removeAllObjects;
 

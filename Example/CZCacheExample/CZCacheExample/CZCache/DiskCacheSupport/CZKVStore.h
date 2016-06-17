@@ -23,7 +23,7 @@
 - (CZKVItem *)getItemForKey:(NSString *)key;
 - (NSData *)getItemValueForKey:(NSString *)key;
 
-- (BOOL)containItemForKey:(NSString *)key;
+- (BOOL)containsItemForKey:(NSString *)key;
 
 - (int)totalItemsCount;
 - (int)totalItemsSize;

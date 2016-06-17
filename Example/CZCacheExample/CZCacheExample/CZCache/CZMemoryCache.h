@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)removeAllObjects;
 
-- (BOOL)containObjectForKey:(id)key;
+- (BOOL)containsObjectForKey:(id)key;
 
 
 - (void)trimToCountLimit:(NSUInteger)count;

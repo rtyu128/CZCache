@@ -244,7 +244,7 @@
     return node ? node->value : nil;
 }
 
-- (BOOL)containObjectForKey:(id)key
+- (BOOL)containsObjectForKey:(id)key
 {
     if (!key) return NO;
     pthread_mutex_lock(&mutexLock);
