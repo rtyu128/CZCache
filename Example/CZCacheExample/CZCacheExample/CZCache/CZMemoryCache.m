@@ -49,8 +49,6 @@
 - (instancetype)init
 {
     if (self = [super init]) {
-        
-        //releaseOnMainThread = NO;
     }
     return self;
 }
@@ -147,7 +145,6 @@
 {
     if (self = [super init]) {
         _countLimit = NSIntegerMax;
-        //_sizeLimit = NSIntegerMax;
         _timeLimit = DBL_MAX;
         autoTrimSwitch = YES;
         _autoTrimInterval = 10.0;
@@ -189,6 +186,9 @@
 
 - (void)didReceiveMemoryWarningNotification:(NSNotification *)notification
 {
+    if (self.didReceiveMemoryWarningBlock) {
+        self.didReceiveMemoryWarningBlock(self);
+    }
     if (_shouldRemoveAllObjectsWhenMemoryWarning) {
         [self removeAllObjects];
     }
@@ -196,6 +196,9 @@
 
 - (void)didEnterBackgroundNotification:(NSNotification *)notification
 {
+    if (self.didEnterBackgroundBlock) {
+        self.didEnterBackgroundBlock(self);
+    }
     if (_shouldRemoveAllObjectsWhenEnteringBackground) {
         [self removeAllObjects];
     }
@@ -286,12 +289,12 @@
 
 - (void)trimToCountLimit:(NSUInteger)count
 {
-    [self trimToCount:count];
+    [self kTrimToCount:count];
 }
 
 - (void)trimToTimeLimit:(NSTimeInterval)time
 {
-    [self trimToLiveTime:time];
+    [self kTrimToLiveTime:time];
 }
 
 
@@ -330,6 +333,7 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(_autoTrimInterval * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         __strong typeof (&*weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
+        [strongSelf trimInBackground];
         [strongSelf autoTrim];
     });
 }
@@ -337,12 +341,12 @@
 - (void)trimInBackground
 {
     dispatch_async(trimQueue, ^{
-        [self trimToCount:self.countLimit];
-        [self trimToLiveTime:self.timeLimit];
+        [self kTrimToCount:self.countLimit];
+        [self kTrimToLiveTime:self.timeLimit];
     });
 }
 
-- (void)trimToCount:(NSUInteger)countLimit
+- (void)kTrimToCount:(NSUInteger)countLimit
 {
     BOOL finish = NO;
     pthread_mutex_lock(&mutexLock);
@@ -376,7 +380,7 @@
     }
 }
 
-- (void)trimToLiveTime:(NSTimeInterval)timeLimit
+- (void)kTrimToLiveTime:(NSTimeInterval)timeLimit
 {
     BOOL finish = NO;
     CFTimeInterval now = CACurrentMediaTime();

@@ -10,29 +10,28 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class CZMemoryCache;
+typedef void (^MemCacheCallBack)(CZMemoryCache *cache);
+
 @interface CZMemoryCache : NSObject
 
 @property (nullable, copy) NSString *name;
 
 @property (readonly) NSInteger totalCount;
 
-//@property (readonly) NSInteger totalSize;
 
 @property NSInteger countLimit;
-
-//@property NSInteger sizeLimit;
-
 @property NSTimeInterval timeLimit;
-
 @property NSTimeInterval autoTrimInterval;
 
-@property BOOL releaseOnMainThread;
 
+@property BOOL releaseOnMainThread;
 @property BOOL releaseAsynchronously;
 
 @property BOOL shouldRemoveAllObjectsWhenMemoryWarning;
-
 @property BOOL shouldRemoveAllObjectsWhenEnteringBackground;
+@property (copy, nullable) MemCacheCallBack didReceiveMemoryWarningBlock;
+@property (copy, nullable) MemCacheCallBack didEnterBackgroundBlock;
 
 - (instancetype)initWithName:(nullable NSString *)name NS_DESIGNATED_INITIALIZER;
 
