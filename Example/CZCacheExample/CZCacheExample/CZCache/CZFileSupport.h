@@ -1,5 +1,5 @@
 //
-//  CZFilePath.h
+//  CZFileSupport.h
 //  CZCache
 //
 //  Created by Anchor on 16/6/13.
@@ -8,7 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-@interface CZFilePath : NSObject
+@interface CZFileSupport : NSObject
+
+#pragma mark - File Path
 
 + (NSString *)homeDirectory;
 
@@ -25,5 +27,12 @@
 + (NSString *)temporaryDirectory;
 
 + (NSString *)documentPathWithFilename:(NSString *)filename;
+
+#pragma mark - File Size&Clean
+
++ (float)fileSizeWithDirectory:(NSString *)directory;
+
++ (BOOL)cleanFilesInDirectory:(NSString *)directory;
+
 
 @end

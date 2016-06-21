@@ -1,20 +1,20 @@
 //
 //  CZCache.m
-//  CZCacheExample
+//  CZCache
 //
 //  Created by Anchor on 16/6/15.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
 
 #import "CZCache.h"
-#import "CZFilePath.h"
+#import "CZFileSupport.h"
 
 @implementation CZCache
 
 - (instancetype)initWithName:(NSString *)name
 {
     if (0 == name.length) return nil;
-    NSString *path = [[CZFilePath documentDirectory] stringByAppendingPathComponent:name];
+    NSString *path = [[CZFileSupport documentDirectory] stringByAppendingPathComponent:name];
     return [self initWithPath:path];
 }
 

@@ -11,7 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class CZMemoryCache;
-typedef void (^MemCacheCallBack)(CZMemoryCache *cache);
+typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 @interface CZMemoryCache : NSObject
 
@@ -30,10 +30,10 @@ typedef void (^MemCacheCallBack)(CZMemoryCache *cache);
 
 @property BOOL shouldRemoveAllObjectsWhenMemoryWarning;
 @property BOOL shouldRemoveAllObjectsWhenEnteringBackground;
-@property (copy, nullable) MemCacheCallBack didReceiveMemoryWarningBlock;
-@property (copy, nullable) MemCacheCallBack didEnterBackgroundBlock;
+@property (copy, nullable) CZMemCacheCallBack didReceiveMemoryWarningBlock;
+@property (copy, nullable) CZMemCacheCallBack didEnterBackgroundBlock;
 
-- (instancetype)initWithName:(nullable NSString *)name NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithName:(nullable NSString *)name NS_DESIGNATED_INITIALIZER;
 
 - (void)setObject:(nullable id)object forKey:(id)key;
 

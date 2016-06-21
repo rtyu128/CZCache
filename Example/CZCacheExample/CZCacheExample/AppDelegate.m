@@ -8,7 +8,7 @@
 
 #import "AppDelegate.h"
 #import "CZMemoryCache.h"
-#import "CZFilePath.h"
+#import "CZFileSupport.h"
 #import "CZKVDataBase.h"
 #import "CZKVItem.h"
 
@@ -51,18 +51,18 @@
     NSLog(@"%f", time);
     
     /**
-     /// CZFilePath Test
-     NSLog(@"%@", [CZFilePath homeDirectory]);
-     NSLog(@"%@", [CZFilePath documentDirectory]);
-     NSLog(@"%@", [CZFilePath libraryDirectory]);
-     NSLog(@"%@", [CZFilePath cachesDirectory]);
-     NSLog(@"%@", [CZFilePath temporaryDirectory]);
+     /// CZFileSupport Test
+     NSLog(@"%@", [CZFileSupport homeDirectory]);
+     NSLog(@"%@", [CZFileSupport documentDirectory]);
+     NSLog(@"%@", [CZFileSupport libraryDirectory]);
+     NSLog(@"%@", [CZFileSupport cachesDirectory]);
+     NSLog(@"%@", [CZFileSupport temporaryDirectory]);
      */
     
     
     /// CZKVDataBase Test
-    NSLog(@"%@", [CZFilePath documentDirectory]);
-    _dataBase = [[CZKVDataBase alloc] initWithDirectory:[CZFilePath documentDirectory]];
+    NSLog(@"%@", [CZFileSupport documentDirectory]);
+    //_dataBase = [[CZKVDataBase alloc] initWithDirectory:[CZFileSupport documentDirectory]];
     
     
     //NSData *data = [NSData data];
@@ -84,6 +84,11 @@
     //    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:zxmData.value];
     //    NSDictionary *zxmInfo = [unarchiver decodeObjectForKey:@"person"];
 
+    float fileSize = [CZFileSupport fileSizeWithDirectory:[CZFileSupport cachesDirectory]];
+    NSLog(@"%.3f MB", fileSize);
+    //BOOL result = [CZFileSupport cleanFilesInDirectory:[CZFileSupport cachesDirectory]];
+    
+    
     return YES;
 }
 

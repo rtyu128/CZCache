@@ -1,6 +1,6 @@
 //
 //  CZCache.h
-//  CZCacheExample
+//  CZCache
 //
 //  Created by Anchor on 16/6/15.
 //  Copyright © 2016年 Anchor. All rights reserved.
@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CZCache : NSObject
+@interface CZCache <KeyType:NSString *, ObjectType:id<NSCoding>> : NSObject
 
 @property (copy, readonly) NSString *name;
 
@@ -25,8 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithName:(NSString *)name;
 - (nullable instancetype)initWithPath:(NSString *)path NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)init UNAVAILABLE_ATTRIBUTE;
-+ (instancetype)new UNAVAILABLE_ATTRIBUTE;
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
 
 
 - (BOOL)containsObjectForKey:(NSString *)key;

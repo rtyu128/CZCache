@@ -18,7 +18,7 @@
 		E865935B1D10112B0095A9D2 /* CZCacheExampleUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = E865935A1D10112B0095A9D2 /* CZCacheExampleUITests.m */; };
 		E86593691D1011D00095A9D2 /* libsqlite3.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = E86593681D1011D00095A9D2 /* libsqlite3.0.tbd */; };
 		E86593761D1011DB0095A9D2 /* CZMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E86593721D1011DB0095A9D2 /* CZMemoryCache.m */; };
-		E8D982181D10E60E00E6BE47 /* CZFilePath.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D982171D10E60E00E6BE47 /* CZFilePath.m */; };
+		E8D982181D10E60E00E6BE47 /* CZFileSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D982171D10E60E00E6BE47 /* CZFileSupport.m */; };
 		E8D982201D10E61A00E6BE47 /* CZKVDataBase.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821B1D10E61A00E6BE47 /* CZKVDataBase.m */; };
 		E8D982211D10E61A00E6BE47 /* CZKVItem.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821D1D10E61A00E6BE47 /* CZKVItem.m */; };
 		E8D982221D10E61A00E6BE47 /* CZKVStore.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D9821F1D10E61A00E6BE47 /* CZKVStore.m */; };
@@ -64,8 +64,8 @@
 		E86593681D1011D00095A9D2 /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
 		E86593711D1011DB0095A9D2 /* CZMemoryCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZMemoryCache.h; sourceTree = "<group>"; };
 		E86593721D1011DB0095A9D2 /* CZMemoryCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZMemoryCache.m; sourceTree = "<group>"; };
-		E8D982161D10E60E00E6BE47 /* CZFilePath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZFilePath.h; sourceTree = "<group>"; };
-		E8D982171D10E60E00E6BE47 /* CZFilePath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZFilePath.m; sourceTree = "<group>"; };
+		E8D982161D10E60E00E6BE47 /* CZFileSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZFileSupport.h; sourceTree = "<group>"; };
+		E8D982171D10E60E00E6BE47 /* CZFileSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZFileSupport.m; sourceTree = "<group>"; };
 		E8D9821A1D10E61A00E6BE47 /* CZKVDataBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZKVDataBase.h; sourceTree = "<group>"; };
 		E8D9821B1D10E61A00E6BE47 /* CZKVDataBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZKVDataBase.m; sourceTree = "<group>"; };
 		E8D9821C1D10E61A00E6BE47 /* CZKVItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZKVItem.h; sourceTree = "<group>"; };
@@ -172,8 +172,8 @@
 				E8D982191D10E61A00E6BE47 /* DiskCacheSupport */,
 				E801A16D1D115E5A00A4FB2F /* CZCache.h */,
 				E801A16E1D115E5A00A4FB2F /* CZCache.m */,
-				E8D982161D10E60E00E6BE47 /* CZFilePath.h */,
-				E8D982171D10E60E00E6BE47 /* CZFilePath.m */,
+				E8D982161D10E60E00E6BE47 /* CZFileSupport.h */,
+				E8D982171D10E60E00E6BE47 /* CZFileSupport.m */,
 				E86593711D1011DB0095A9D2 /* CZMemoryCache.h */,
 				E86593721D1011DB0095A9D2 /* CZMemoryCache.m */,
 				E8D982231D1132C100E6BE47 /* CZDiskCache.h */,
@@ -333,7 +333,7 @@
 				E8D982211D10E61A00E6BE47 /* CZKVItem.m in Sources */,
 				E86593371D10112B0095A9D2 /* main.m in Sources */,
 				E8D982201D10E61A00E6BE47 /* CZKVDataBase.m in Sources */,
-				E8D982181D10E60E00E6BE47 /* CZFilePath.m in Sources */,
+				E8D982181D10E60E00E6BE47 /* CZFileSupport.m in Sources */,
 				E801A16F1D115E5A00A4FB2F /* CZCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
