@@ -67,24 +67,28 @@
     return totalSize / 1024.0 / 1024.0;
 }
 
-+ (BOOL)cleanFilesInDirectory:(NSString *)directory
++ (void)cleanFilesInDirectory:(NSString *)directory completion:(void (^)(NSString *directory, BOOL result))completion
 {
-    if (!directory) return NO;
+    if (!directory) {
+        if (completion) completion(directory, NO);
+        return;
+    }
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSArray<NSString *> *contents = [fileManager contentsOfDirectoryAtPath:directory error:nil];
     
-    BOOL result = YES;
-    NSError *error = nil;
-    NSString *fullPath = nil;
-    
-    for (NSString *subpath in contents) {
-        fullPath = [directory stringByAppendingPathComponent:subpath];
-        [fileManager removeItemAtPath:fullPath error:&error];
-        if (error) result = NO;
-    }
-    return result;
+    dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+    dispatch_async(globalQueue, ^{
+        BOOL result = YES;
+        NSError *error = nil;
+        NSString *fullPath = nil;
+        for (NSString *subpath in contents) {
+            fullPath = [directory stringByAppendingPathComponent:subpath];
+            [fileManager removeItemAtPath:fullPath error:&error];
+            if (error) result = NO;
+        }
+        if (completion) completion(directory, result);
+    });
 }
-
 
 @end

@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class CZMemoryCache;
 typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
-@interface CZMemoryCache : NSObject
+@interface CZMemoryCache <KeyType, ObjectType> : NSObject
 
 @property (nullable, copy) NSString *name;
 
@@ -35,15 +35,15 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 - (nullable instancetype)initWithName:(nullable NSString *)name NS_DESIGNATED_INITIALIZER;
 
-- (void)setObject:(nullable id)object forKey:(id)key;
+- (void)setObject:(nullable ObjectType)object forKey:(KeyType)key;
 
-- (nullable id)objectForKey:(id)key;
+- (nullable ObjectType)objectForKey:(KeyType)key;
 
-- (void)removeObjectForKey:(id)key;
+- (void)removeObjectForKey:(KeyType)key;
 
 - (void)removeAllObjects;
 
-- (BOOL)containsObjectForKey:(id)key;
+- (BOOL)containsObjectForKey:(KeyType)key;
 
 
 - (void)trimToCountLimit:(NSUInteger)count;

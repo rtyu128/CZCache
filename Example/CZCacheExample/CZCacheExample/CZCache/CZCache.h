@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CZCache <KeyType:NSString *, ObjectType:id<NSCoding>> : NSObject
+@interface CZCache <KeyType:NSString *, ObjectType> : NSObject
 
 @property (copy, readonly) NSString *name;
 
@@ -29,10 +29,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 
 
-- (BOOL)containsObjectForKey:(NSString *)key;
-- (nullable id<NSCoding>)objectForKey:(NSString *)key;
-- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key;
-- (void)removeObjectForKey:(NSString *)key;
+- (BOOL)containsObjectForKey:(KeyType)key;
+- (nullable ObjectType <NSCoding>)objectForKey:(KeyType)key;
+- (void)setObject:(nullable ObjectType <NSCoding>)object forKey:(KeyType)key;
+- (void)removeObjectForKey:(KeyType)key;
 - (void)removeAllOnjects;
 
 @end

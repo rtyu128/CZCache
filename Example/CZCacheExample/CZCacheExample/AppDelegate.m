@@ -86,7 +86,9 @@
 
     float fileSize = [CZFileSupport fileSizeWithDirectory:[CZFileSupport cachesDirectory]];
     NSLog(@"%.3f MB", fileSize);
-    //BOOL result = [CZFileSupport cleanFilesInDirectory:[CZFileSupport cachesDirectory]];
+    [CZFileSupport cleanFilesInDirectory:[CZFileSupport cachesDirectory] completion:^(NSString *directory, BOOL result) {
+        NSLog(@"\raaaa: %d", result);
+    }];
     
     
     return YES;

@@ -32,7 +32,7 @@
 
 + (float)fileSizeWithDirectory:(NSString *)directory;
 
-+ (BOOL)cleanFilesInDirectory:(NSString *)directory;
++ (void)cleanFilesInDirectory:(NSString *)directory completion:(void (^)(NSString *directory, BOOL result))completion;
 
 
 @end
