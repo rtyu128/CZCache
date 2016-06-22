@@ -35,7 +35,6 @@
 - (NSString *)dbGetFilenameWithKey:(NSString *)key;
 
 - (int)dbGetTotalItemSize;
-
 - (int)dbGetTotalItemCount;
 
 @end

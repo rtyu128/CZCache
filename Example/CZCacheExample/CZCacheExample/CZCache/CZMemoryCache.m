@@ -14,7 +14,8 @@
     @package
     id key;
     id value;
-    CFTimeInterval lastUsedTime;
+    CFTimeInterval creationTime;
+    NSTimeInterval age;
     __unsafe_unretained CacheKVNode *prev;
     __unsafe_unretained CacheKVNode *next;
 }
@@ -145,7 +146,6 @@
 {
     if (self = [super init]) {
         _countLimit = NSIntegerMax;
-        //_timeLimit = DBL_MAX;
         autoTrimSwitch = YES;
         _autoTrimInterval = 10.0;
         _releaseOnMainThread = NO;
@@ -210,6 +210,11 @@
 
 - (void)setObject:(nullable id)object forKey:(id)key
 {
+    [self setObject:object forKey:key lifeTime:0];
+}
+
+- (void)setObject:(id)object forKey:(id)key lifeTime:(NSTimeInterval)age
+{
     if (!key) return;
     if (!object) {
         [self removeObjectForKey:key];
@@ -221,29 +226,39 @@
     CFTimeInterval now = CACurrentMediaTime();
     if (node) {
         node->value = object;
-        node->lastUsedTime = now;
+        node->creationTime = now;
+        node->age = age > 0 ? age : 0;
         [list bringNodeToHead:node];
     } else {
         node = [[CacheKVNode alloc] init];
         node->key = key;
         node->value = object;
-        node->lastUsedTime = now;
+        node->creationTime = now;
+        node->age = age > 0 ? age : 0;
         CFDictionarySetValue(dict, (__bridge const void *)key, (__bridge const void *)node);
         [list insertNodeAtHead:node];
     }
     pthread_mutex_unlock(&mutexLock);
+
 }
 
 - (nullable id)objectForKey:(id)key
 {   if (!key) return nil;
+    BOOL invalid = NO;
     pthread_mutex_lock(&mutexLock);
     CacheKVNode *node = CFDictionaryGetValue(dict, (__bridge const void *)key);
     if (node) {
-        node->lastUsedTime = CACurrentMediaTime();
-        [list bringNodeToHead:node];
+        CFTimeInterval now = CACurrentMediaTime();
+        if (0 == node->age || (now - node->creationTime <= node->age)) {
+            [list bringNodeToHead:node];
+        } else {
+            node = nil;
+            invalid = YES;
+        }
     }
     pthread_mutex_unlock(&mutexLock);
     
+    if (invalid) [self removeObjectForKey:key];
     return node ? node->value : nil;
 }
 
@@ -282,12 +297,6 @@
 {
     [self kTrimToCount:count];
 }
-/*
-- (void)trimToTimeLimit:(NSTimeInterval)time
-{
-    [self kTrimToLiveTime:time];
-}
-*/
 
 #pragma mark - Private
 #pragma mark - Helper Method
@@ -333,7 +342,6 @@
 {
     dispatch_async(trimQueue, ^{
         [self kTrimToCount:self.countLimit];
-        //[self kTrimToLiveTime:self.timeLimit];
     });
 }
 
@@ -370,42 +378,7 @@
         });
     }
 }
-/*
-- (void)kTrimToLiveTime:(NSTimeInterval)timeLimit
-{
-    BOOL finish = NO;
-    CFTimeInterval now = CACurrentMediaTime();
-    pthread_mutex_lock(&mutexLock);
-    if (timeLimit <= 0) {
-        [self removeAllData];
-        finish = YES;
-    } else if (!list->tail || (now - list->tail->lastUsedTime) <= timeLimit) {
-        finish = YES;
-    }
-    pthread_mutex_unlock(&mutexLock);
-    if (finish) return;
 
-    NSMutableArray *holder = [NSMutableArray arrayWithCapacity:2];
-    do {
-        pthread_mutex_lock(&mutexLock);
-        CacheKVNode *node = [list removeTailNode];
-        if (node) {
-            CFDictionaryRemoveValue(dict, (__bridge const void *)(node->key));
-            [holder addObject:node];
-        }
-        if (!list->tail || (now - list->tail->lastUsedTime <= timeLimit)) finish = YES;
-        pthread_mutex_unlock(&mutexLock);
-    } while (!finish);
-    
-    if (holder.count > 0) {
-        dispatch_queue_t queue = _releaseOnMainThread ?
-        dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-        dispatch_async(queue, ^{
-            [holder description];
-        });
-    }
-}
-*/
 
 #pragma mark - Setter & Getter
 
