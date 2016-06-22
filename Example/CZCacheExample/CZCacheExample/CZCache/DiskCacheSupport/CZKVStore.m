@@ -97,21 +97,26 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
 
 - (BOOL)saveItem:(CZKVItem *)item
 {
-    return [self saveItemWithKey:item.key value:item.value filename:item.filename];
+    return [self saveItemWithKey:item.key value:item.value filename:item.filename lifetime:item.lifeTime];
 }
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value
 {
-    return [self saveItemWithKey:key value:value filename:nil];
+    return [self saveItemWithKey:key value:value filename:nil lifetime:LIVE_FFOREVER];
 }
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
+{
+    return [self saveItemWithKey:key value:value filename:filename lifetime:LIVE_FFOREVER];
+}
+
+- (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime
 {
     if (0 == key.length || 0 == value.length) return NO;
     
     if (filename.length > 0) {
         if ([self cacheWriteData:value toFile:filename]) {
-            if ([db dbSaveItemWithKey:key value:value filename:filename]) {
+            if ([db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime]) {
                 return YES;
             } else {
                 [self cacheDeleteFile:filename];
@@ -119,7 +124,7 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
         }
         return NO;
     } else {
-        return [db dbSaveItemWithKey:key value:value filename:filename];
+        return [db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime];
     }
 }
 
@@ -149,6 +154,14 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
     if (0 == key.length) return nil;
     CZKVItem *item = [db dbGetItemForKey:key];
     if (item) {
+        if (![item isValid]) {
+            if (item.filename.length > 0) {
+                [self cacheDeleteFile:item.filename];
+            }
+            [db dbDeleteItemWithKey:key];
+            item = nil;
+        }
+        
         if (item.filename.length > 0) {
             item.value = [self cacheDataFromFile:item.filename];
             if (!item.value) {
@@ -159,7 +172,7 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
     }
     return item;
 }
-
+/*
 - (NSData *)getItemValueForKey:(NSString *)key
 {
     if (0 == key.length) return nil;
@@ -176,11 +189,7 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
     }
     return value;
 }
-
-- (BOOL)containsItemForKey:(NSString *)key
-{
-    return key.length > 0 ? [db dbGetItemCountForKey:key] > 0 : NO;
-}
+*/
 
 - (int)totalItemsCount
 {

@@ -60,7 +60,7 @@ static NSString *MD5String (NSString *string) {
     dispatch_semaphore_signal(lockSignal);
 }
 
-- (nullable id<NSCoding>)objectForKey:(NSString *)key
+- (id<NSCoding>)objectForKey:(NSString *)key
 {
     if (!key) return nil;
     [self lock];
@@ -73,7 +73,12 @@ static NSString *MD5String (NSString *string) {
     return object;
 }
 
-- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
+{
+    [self setObject:object forKey:key lifetime:LIVE_FFOREVER];
+}
+
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime
 {
     if (!key) return;
     if (!object) {
@@ -90,17 +95,8 @@ static NSString *MD5String (NSString *string) {
     }
     
     [self lock];
-    [kvStore saveItemWithKey:key value:valueData filename:filename];
+    [kvStore saveItemWithKey:key value:valueData filename:filename lifetime:lifetime];
     [self unlock];
-}
-
-- (BOOL)containsObjectForKey:(NSString *)key
-{
-    if (!key) return NO;
-    [self lock];
-    BOOL result = [kvStore containsItemForKey:key];
-    [self unlock];
-    return result;
 }
 
 - (void)removeObjectForKey:(NSString *)key

@@ -10,4 +10,11 @@
 
 @implementation CZKVItem
 
+- (BOOL)isValid
+{
+    if (0 == self.lifeTime) return YES;
+    long now = time(NULL);
+    return (now - self.creationDate) <= self.lifeTime;
+}
+
 @end

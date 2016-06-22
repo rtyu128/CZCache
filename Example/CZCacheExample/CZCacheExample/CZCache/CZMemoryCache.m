@@ -145,7 +145,7 @@
 {
     if (self = [super init]) {
         _countLimit = NSIntegerMax;
-        _timeLimit = DBL_MAX;
+        //_timeLimit = DBL_MAX;
         autoTrimSwitch = YES;
         _autoTrimInterval = 10.0;
         _releaseOnMainThread = NO;
@@ -247,15 +247,6 @@
     return node ? node->value : nil;
 }
 
-- (BOOL)containsObjectForKey:(id)key
-{
-    if (!key) return NO;
-    pthread_mutex_lock(&mutexLock);
-    BOOL result = CFDictionaryContainsKey(dict, (__bridge const void *)key);
-    pthread_mutex_unlock(&mutexLock);
-    return result;
-}
-
 - (void)removeObjectForKey:(id)key
 {
     if (!key) return;
@@ -291,12 +282,12 @@
 {
     [self kTrimToCount:count];
 }
-
+/*
 - (void)trimToTimeLimit:(NSTimeInterval)time
 {
     [self kTrimToLiveTime:time];
 }
-
+*/
 
 #pragma mark - Private
 #pragma mark - Helper Method
@@ -342,7 +333,7 @@
 {
     dispatch_async(trimQueue, ^{
         [self kTrimToCount:self.countLimit];
-        [self kTrimToLiveTime:self.timeLimit];
+        //[self kTrimToLiveTime:self.timeLimit];
     });
 }
 
@@ -379,7 +370,7 @@
         });
     }
 }
-
+/*
 - (void)kTrimToLiveTime:(NSTimeInterval)timeLimit
 {
     BOOL finish = NO;
@@ -414,7 +405,7 @@
         });
     }
 }
-
+*/
 
 #pragma mark - Setter & Getter
 

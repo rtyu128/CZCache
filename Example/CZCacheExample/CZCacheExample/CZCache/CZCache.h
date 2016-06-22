@@ -28,8 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-
-- (BOOL)containsObjectForKey:(KeyType)key;
 - (nullable ObjectType <NSCoding>)objectForKey:(KeyType)key;
 - (void)setObject:(nullable ObjectType <NSCoding>)object forKey:(KeyType)key;
 - (void)removeObjectForKey:(KeyType)key;

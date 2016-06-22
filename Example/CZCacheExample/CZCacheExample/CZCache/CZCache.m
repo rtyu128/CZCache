@@ -34,11 +34,6 @@
     return self;
 }
 
-- (BOOL)containsObjectForKey:(NSString *)key
-{
-    return [_memoryCache containsObjectForKey:key] || [_diskCache containsObjectForKey:key];
-}
-
 - (id<NSCoding>)objectForKey:(NSString *)key
 {
     id<NSCoding> object = [_memoryCache objectForKey:key];

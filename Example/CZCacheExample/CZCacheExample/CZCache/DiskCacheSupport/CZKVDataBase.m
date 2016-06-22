@@ -153,7 +153,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (BOOL)dbInitialize
 {
-    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KVTable (key text, value_data blob, filename text, size integer, last_modified_time, primary key(key));";
+    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, creation_date integer, life_time integer default 0, primary key(key));";
     return [self dbExecute:initSql];
 }
 
@@ -199,7 +199,12 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    NSString *sqlStr = @"insert or replace into KVTable (key, value_data, filename, size, last_modified_time) values (?1, ?2, ?3, ?4, ?5);";
+    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:LIVE_FFOREVER];
+}
+
+- (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime
+{
+    NSString *sqlStr = @"insert or replace into KeyValues (key, value_data, filename, size, creation_date, life_time) values (?1, ?2, ?3, ?4, ?5, ?6);";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return NO;
     
@@ -213,8 +218,9 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     }
     sqlite3_bind_int(stmt, 4, (int)value.length);
     
-    int timeStamp = (int)time(NULL);
-    sqlite3_bind_int(stmt, 5, timeStamp);
+    long creationTime = time(NULL);
+    sqlite3_bind_int64(stmt, 5, creationTime);
+    sqlite3_bind_double(stmt, 6, lifetime);
     
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
@@ -227,7 +233,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key
 {
-    NSString *sqlStr = @"delete from KVTable where key = ?;";
+    NSString *sqlStr = @"delete from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return NO;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -243,7 +249,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
-    NSString *sqlStr = @"select key, value_data, filename, size, last_modified_time from KVTable where key = ?;";
+    NSString *sqlStr = @"select key, value_data, filename, size, creation_Date, life_time from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -269,39 +275,22 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     int valueDataSize = sqlite3_column_bytes(stmt, i++);
     char *filename = (char *)sqlite3_column_text(stmt, i++);
     int size = sqlite3_column_int(stmt, i++);
-    int lastModifiedTime = sqlite3_column_int(stmt, i++);
+    long creationDate = sqlite3_column_int64(stmt, i++);
+    double lifeTime = sqlite3_column_double(stmt, i++);
     
     CZKVItem *item = [[CZKVItem alloc] init];
     if (key) item.key = [NSString stringWithUTF8String:key];
     if (valueData && valueDataSize > 0) item.value = [NSData dataWithBytes:valueData length:valueDataSize];
     if (filename && *filename != 0) item.filename = [NSString stringWithUTF8String:filename];
     item.size = size;
-    item.lastModifiedTime = lastModifiedTime;
+    item.creationDate = creationDate;
+    item.lifeTime = lifeTime;
     return item;
-}
-
-- (NSData *)dbGetValueForKey:(NSString *)key
-{
-    NSString *sqlStr = @"select value_data from KVTable where key = ?;";
-    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
-    if (!stmt) return nil;
-    sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
-
-    int result = sqlite3_step(stmt);
-    if (result == SQLITE_ROW) {
-        const void *valueData = sqlite3_column_blob(stmt, 0);
-        int valueDataSize = sqlite3_column_bytes(stmt, 0);
-        return (valueData && valueDataSize > 0) ? [NSData dataWithBytes:valueData length:valueDataSize] : nil;
-    } else {
-        if (result != SQLITE_DONE)
-            NSLog(@"%s line %d: database query error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
-        return nil;
-    }
 }
 
 - (NSString *)dbGetFilenameWithKey:(NSString *)key
 {
-    NSString *sqlStr = @"select filename form KVTable where key = ?;";
+    NSString *sqlStr = @"select filename form KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -320,25 +309,9 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     return nil;
 }
 
-- (int)dbGetItemCountForKey:(NSString *)key
-{
-    NSString *sqlStr = @"select count(key) from KVTable where key = ?;";
-    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
-    if (!stmt) return -1;
-    sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
-    
-    int result = sqlite3_step(stmt);
-    if (result != SQLITE_ROW) {
-        if (_errorLogsSwitch)
-            NSLog(@"%s line %d: database query error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
-        return -1;
-    }
-    return sqlite3_column_int(stmt, 0);
-}
-
 - (int)dbGetTotalItemSize
 {
-    NSString *sqlStr = @"select sum(size) from KVTable;";
+    NSString *sqlStr = @"select sum(size) from KeyValues;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return -1;
     
@@ -354,7 +327,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (int)dbGetTotalItemCount
 {
-    NSString *sqlStr = @"select count(*) from KVTable;";
+    NSString *sqlStr = @"select count(*) from KeyValues;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return -1;
     

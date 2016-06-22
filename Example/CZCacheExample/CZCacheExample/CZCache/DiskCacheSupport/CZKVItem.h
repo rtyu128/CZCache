@@ -10,6 +10,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#define LIVE_FFOREVER 0
+
 @interface CZKVItem : NSObject
 
 @property (nonatomic, strong) NSString *key;
@@ -17,7 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSString *filename;
 
 @property (nonatomic, assign) int size;
-@property (nonatomic, assign) int lastModifiedTime;
+@property (nonatomic, assign) long creationDate;
+@property (nonatomic, assign) NSTimeInterval lifeTime;
+
+- (BOOL)isValid;
 
 @end
 

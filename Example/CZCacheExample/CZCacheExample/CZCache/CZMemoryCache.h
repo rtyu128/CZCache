@@ -21,7 +21,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 
 @property NSInteger countLimit;
-@property NSTimeInterval timeLimit;
+//@property NSTimeInterval timeLimit;
 @property NSTimeInterval autoTrimInterval;
 
 
@@ -43,12 +43,10 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 - (void)removeAllObjects;
 
-- (BOOL)containsObjectForKey:(KeyType)key;
-
 
 - (void)trimToCountLimit:(NSUInteger)count;
 
-- (void)trimToTimeLimit:(NSTimeInterval)time;
+//- (void)trimToTimeLimit:(NSTimeInterval)time;
 
 @end
 

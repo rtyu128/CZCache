@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CZDiskCache : NSObject
@@ -28,9 +27,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithPath:(NSString *)path;
 - (nullable instancetype)initWithPath:(NSString *)path dbStoreThreshold:(NSUInteger) threshold;
 
+
 - (nullable id<NSCoding>)objectForKey:(NSString *)key;
 - (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key;
-- (BOOL)containsObjectForKey:(NSString *)key;
+- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime;
+
 - (void)removeObjectForKey:(NSString *)key;
 - (void)removeAllObjects;
 
