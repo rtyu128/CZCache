@@ -19,7 +19,6 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 @property (readonly) NSInteger totalCount;
 
-
 @property NSInteger countLimit;
 @property NSTimeInterval autoTrimInterval;
 

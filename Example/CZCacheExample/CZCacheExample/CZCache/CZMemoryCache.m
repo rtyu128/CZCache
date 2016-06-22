@@ -47,13 +47,6 @@
 
 @implementation CacheDoublyLinkedList
 
-- (instancetype)init
-{
-    if (self = [super init]) {
-    }
-    return self;
-}
-
 - (void)insertNodeAtHead:(CacheKVNode *)node
 {
     totalCount ++;
@@ -147,7 +140,7 @@
     if (self = [super init]) {
         _countLimit = NSIntegerMax;
         autoTrimSwitch = YES;
-        _autoTrimInterval = 10.0;
+        _autoTrimInterval = 20.0;
         _releaseOnMainThread = NO;
         _releaseAsynchronously = YES;
         _shouldRemoveAllObjectsWhenMemoryWarning = YES;
@@ -342,6 +335,7 @@
 {
     dispatch_async(trimQueue, ^{
         [self kTrimToCount:self.countLimit];
+        [self kExpireClean];
     });
 }
 
@@ -358,27 +352,51 @@
     pthread_mutex_unlock(&mutexLock);
     if (finish) return;
     
-    NSMutableArray *holder = [NSMutableArray arrayWithCapacity:2];
+    CFMutableArrayRef holder = CFArrayCreateMutable(CFAllocatorGetDefault(), 2, &kCFTypeArrayCallBacks);
     do {
         pthread_mutex_lock(&mutexLock);
         CacheKVNode *node = [list removeTailNode];
         if (node) {
+            CFArrayAppendValue(holder, (__bridge const void *)node);
             CFDictionaryRemoveValue(dict, (__bridge const void *)(node->key));
-            [holder addObject:node];
         }
         if (list->totalCount <= countLimit) finish = YES;
         pthread_mutex_unlock(&mutexLock);
     } while (!finish);
     
-    if (holder.count > 0) {
+    if (CFArrayGetCount(holder) > 0) {
         dispatch_queue_t queue = _releaseOnMainThread ?
         dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
         dispatch_async(queue, ^{
-            [holder description];
+            CFRelease(holder);
         });
     }
 }
 
+- (void)kExpireClean
+{
+    CFMutableArrayRef holder = CFArrayCreateMutable(CFAllocatorGetDefault(), 2, &kCFTypeArrayCallBacks);
+    pthread_mutex_lock(&mutexLock);
+    CFTimeInterval now = CACurrentMediaTime();
+    CacheKVNode *node = list->head;
+    while (node) {
+        if (node->age > 0 && (now - node->creationTime > node->age)) {
+            [list removeNode:node];
+            CFArrayAppendValue(holder, (__bridge const void *)node);
+            CFDictionaryRemoveValue(dict, (__bridge const void *)(node->key));
+        }
+        node = node->next;
+    }
+    pthread_mutex_unlock(&mutexLock);
+    
+    if (CFArrayGetCount(holder) > 0) {
+        dispatch_queue_t queue = _releaseOnMainThread ?
+        dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+        dispatch_async(queue, ^{
+            CFRelease(holder);
+        });
+    }
+}
 
 #pragma mark - Setter & Getter
 
