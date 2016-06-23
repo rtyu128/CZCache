@@ -26,6 +26,7 @@ static NSString *MD5String (NSString *string) {
 
 @implementation CZDiskCache {
     CZKVStore *kvStore;
+    dispatch_queue_t accessQueue;
     dispatch_semaphore_t lockSignal;
     
 }
@@ -45,10 +46,11 @@ static NSString *MD5String (NSString *string) {
         if (!kvStore) return nil;
         
         _path = directory;
-        lockSignal = dispatch_semaphore_create(1);
-        _dbStoreThreshold = threshold;
-        _countLimit = NSUIntegerMax;
         _sizeLimit = NSUIntegerMax;
+        _countLimit = NSUIntegerMax;
+        _dbStoreThreshold = threshold;
+        lockSignal = dispatch_semaphore_create(1);
+        accessQueue = dispatch_queue_create("com.netease.memory", DISPATCH_QUEUE_CONCURRENT);
     }
     return self;
 }
@@ -65,6 +67,11 @@ static NSString *MD5String (NSString *string) {
 
 - (id<NSCoding>)objectForKey:(NSString *)key
 {
+    return [self objectForKey:key remainLife:NULL];
+}
+
+- (id<NSCoding>)objectForKey:(NSString *)key remainLife:(NSTimeInterval *)remainLife
+{
     if (!key) return nil;
     [self lock];
     CZKVItem *item = [kvStore getItemForKey:key];
@@ -73,7 +80,20 @@ static NSString *MD5String (NSString *string) {
     
     id object = nil;
     object = [NSKeyedUnarchiver unarchiveObjectWithData:item.value];
+    if (remainLife) *remainLife = item.remainLife;
     return object;
+}
+
+- (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion
+{
+    if (!completion) return;
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        id<NSCoding> object = [self objectForKey:key];
+        completion(strongSelf, key, object);
+    });
 }
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
@@ -102,6 +122,17 @@ static NSString *MD5String (NSString *string) {
     [self unlock];
 }
 
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime completion:(CZDiskCacheObjectBlock)completion
+{
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [self setObject:object forKey:key lifetime:lifetime];
+        if (completion) completion(strongSelf, key, object);
+    });
+}
+
 - (void)removeObjectForKey:(NSString *)key
 {
     if (!key) return;
@@ -110,11 +141,33 @@ static NSString *MD5String (NSString *string) {
     [self unlock];
 }
 
+- (void)removeObjectForKey:(NSString *)key completion:(void (^)(NSString *key))completion
+{
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [self removeObjectForKey:key];
+        if (completion) completion(key);
+    });
+}
+
 - (void)removeAllObjects
 {
     [self lock];
     [kvStore removeAllItems];
     [self unlock];
+}
+
+- (void)removeAllObjectsAsync:(void (^)(void))completion
+{
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [self removeAllObjects];
+        if (completion) completion();
+    });
 }
 
 - (NSInteger)totalCount

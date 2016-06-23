@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) long expireDate;
 
 - (BOOL)isValid;
+- (NSTimeInterval)remainLife;
 
 @end
 

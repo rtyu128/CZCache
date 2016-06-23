@@ -34,6 +34,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 - (nullable instancetype)initWithName:(nullable NSString *)name NS_DESIGNATED_INITIALIZER;
 
 - (void)setObject:(nullable ObjectType)object forKey:(KeyType)key;
+- (void)setObject:(nullable ObjectType)object forKey:(KeyType)key lifeTime:(NSTimeInterval)age;
 
 - (nullable ObjectType)objectForKey:(KeyType)key;
 

@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CZCache <KeyType:NSString *, ObjectType> : NSObject
 
+typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable ObjectType<NSCoding> object);
+
 @property (copy, readonly) NSString *name;
 
 @property (strong, readonly) CZMemoryCache *memoryCache;
@@ -26,10 +28,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithName:(NSString *)name directory:(nullable NSString *)directory NS_DESIGNATED_INITIALIZER;
 
 
-- (nullable ObjectType <NSCoding>)objectForKey:(KeyType)key;
-- (void)setObject:(nullable ObjectType <NSCoding>)object forKey:(KeyType)key;
+- (nullable ObjectType<NSCoding>)objectForKey:(KeyType)key;
+- (void)objectForKey:(NSString *)key completion:(CZCacheObjectBlock)completion;
+- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key;
+- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key age:(NSTimeInterval)age;
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key age:(NSTimeInterval)age completion:(nullable CZCacheObjectBlock)completion;
 - (void)removeObjectForKey:(KeyType)key;
-- (void)removeAllOnjects;
+- (void)removeObjectForKey:(NSString *)key completion:(nullable void (^)(NSString *))completion;
+- (void)removeAllObjects;
+- (void)removeAllObjectsAsync:(nullable void (^)(void))completion;
 
 @end
 
