@@ -8,13 +8,17 @@
 
 #import "AppDelegate.h"
 #import "CZMemoryCache.h"
+#import "CZDiskCache.h"
 #import "CZFileSupport.h"
 #import "CZKVDataBase.h"
 #import "CZKVItem.h"
+#import "ViewController.h"
+
 
 @interface AppDelegate ()
 
 @property (nonatomic, strong) CZKVDataBase *dataBase;
+@property (nonatomic, strong) CZDiskCache *diskCache;
 
 @end
 
@@ -23,6 +27,11 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    ViewController *rootVC = [[ViewController alloc] init];
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    self.window.rootViewController = rootVC;
+    [self.window makeKeyAndVisible];
     
     /**
      /// CZMemoryCache Test
@@ -84,12 +93,28 @@
     //    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:zxmData.value];
     //    NSDictionary *zxmInfo = [unarchiver decodeObjectForKey:@"person"];
 
+    /*
     float fileSize = [CZFileSupport fileSizeWithDirectory:[CZFileSupport cachesDirectory]];
     NSLog(@"%.3f MB", fileSize);
     [CZFileSupport cleanFilesInDirectory:[CZFileSupport cachesDirectory] completion:^(NSString *directory, BOOL result) {
         NSLog(@"\raaaa: %d", result);
     }];
+    */
     
+    NSDictionary *hosts = @{@"nickName" : @"Asshole", @"Company" : @"ABCD", @"age" : @88};
+    _diskCache = [[CZDiskCache alloc] initWithDirectory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:@"userInfo"]
+                                       dbStoreThreshold:500];
+//    [_diskCache setObject:@"Asshole" forKey:@"nickName"];
+//    [_diskCache setObject:@"ABCD" forKey:@"Company"];
+    [_diskCache setObject:hosts forKey:@"Hosts"];
+    
+//    NSLog(@"%@", [_diskCache objectForKey:@"nickName"]);
+//    NSLog(@"%@", [_diskCache objectForKey:@"Company"]);
+    NSLog(@"%@", [_diskCache objectForKey:@"Hosts"]);
+    
+//    [_diskCache removeObjectForKey:@"nickName"];
+//    [_diskCache removeObjectForKey:@"Company"];
+    [_diskCache removeObjectForKey:@"Hosts"];
     
     return YES;
 }

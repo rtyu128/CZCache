@@ -180,7 +180,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
         int result = sqlite3_prepare_v2(dataBase, sqlStr.UTF8String, -1, &stmt, NULL);
         if (result != SQLITE_OK) {
             if (_errorLogsSwitch)
-                NSLog(@"%s line %d: sqlite stmt prepare error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+                NSLog(@"%s line %d: sqlite stmt[%@] prepare error (%d): %s", __func__, __LINE__, sqlStr, result, sqlite3_errmsg(dataBase));
             return NULL;
         }
         CFDictionarySetValue(dbStmtCache, (__bridge const void *)sqlStr, stmt);
@@ -281,7 +281,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (NSString *)dbGetFilenameWithKey:(NSString *)key
 {
-    NSString *sqlStr = @"select filename form KeyValues where key = ?;";
+    NSString *sqlStr = @"select filename from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
