@@ -11,25 +11,15 @@
 
 @implementation CZCache
 
-- (instancetype)initWithName:(NSString *)name
+- (instancetype)initWithName:(NSString *)name directory:(NSString *)directory
 {
     if (0 == name.length) return nil;
-    NSString *path = [[CZFileSupport documentDirectory] stringByAppendingPathComponent:name];
-    return [self initWithPath:path];
-}
-
-- (instancetype)initWithPath:(NSString *)path
-{
-    if (0 == path.length) return nil;
+    NSString *fileDirectory = 0 == directory.length ? [CZFileSupport cachesDirectory] : directory;
     if (self = [super init]) {
-        CZDiskCache *diskCache = [[CZDiskCache alloc] initWithPath:path];
-        if (!diskCache) return nil;
-        NSString *name = [path lastPathComponent];
-        CZMemoryCache *memoryCache = [[CZMemoryCache alloc] initWithName:name];
-        
         _name = name;
-        _diskCache = diskCache;
-        _memoryCache = memoryCache;
+        _diskCache = [[CZDiskCache alloc] initWithDirectory:[fileDirectory stringByAppendingPathComponent:name]];
+        if (!_diskCache) return nil;
+        _memoryCache = [[CZMemoryCache alloc] initWithName:name];
     }
     return self;
 }

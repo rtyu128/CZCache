@@ -10,39 +10,42 @@
 #import "CZKVItem.h"
 #import "CZKVDataBase.h"
 
+static NSString *const kDataBaseDirectoryName = @"database";
 static NSString *const kValueFileDirectoryName = @"value";
-static NSString *const kValueFileTrashDirectoryName = @"value_trash";
+static NSString *const kValueFileTrashDirectoryName = @"asshole";
 
 @implementation CZKVStore {
     CZKVDataBase *db;
     
+    NSString *databaseDirectory;
     NSString *valueFileDirectory;
     NSString *valueFileTrashDirectory;
     
     dispatch_queue_t trashQueue;
 }
 
-- (instancetype)initWithPath:(NSString *)path
+- (instancetype)initWithDirectory:(NSString *)directory
 {
-    if (0 == path.length) {
-        return nil;
-    }
-
+    // 不对directory检查空 在外部保证
     if (self = [super init]) {
-        valueFileDirectory = [path stringByAppendingPathComponent:kValueFileDirectoryName];
-        valueFileTrashDirectory = [path stringByAppendingPathComponent:kValueFileTrashDirectoryName];
+        databaseDirectory = [directory stringByAppendingPathComponent:kDataBaseDirectoryName];
+        valueFileDirectory = [directory stringByAppendingPathComponent:kValueFileDirectoryName];
+        valueFileTrashDirectory = [directory stringByAppendingPathComponent:kValueFileTrashDirectoryName];
         
         trashQueue = dispatch_queue_create("com.netease.disk.trash", DISPATCH_QUEUE_SERIAL);
         
         // 暂未处理目录创建失败
+        [[NSFileManager defaultManager] createDirectoryAtPath:databaseDirectory
+                                  withIntermediateDirectories:YES attributes:nil error:nil];
         [[NSFileManager defaultManager] createDirectoryAtPath:valueFileDirectory
                                   withIntermediateDirectories:YES attributes:nil error:nil];
         [[NSFileManager defaultManager] createDirectoryAtPath:valueFileTrashDirectory
                                   withIntermediateDirectories:YES attributes:nil error:nil];
+        // 若database目录创建成功则创建database
+        db = [[CZKVDataBase alloc] initWithDirectory:databaseDirectory];
     }
     return self;
 }
-
 
 #pragma mark - File Support
 
@@ -94,11 +97,6 @@ static NSString *const kValueFileTrashDirectoryName = @"value_trash";
 
 
 #pragma mark Public
-
-- (BOOL)saveItem:(CZKVItem *)item
-{
-    return [self saveItemWithKey:item.key value:item.value filename:item.filename lifetime:item.lifeTime];
-}
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value
 {

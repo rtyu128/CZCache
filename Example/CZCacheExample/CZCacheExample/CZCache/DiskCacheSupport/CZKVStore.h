@@ -11,9 +11,8 @@
 @class CZKVItem;
 @interface CZKVStore : NSObject
 
-- (instancetype)initWithPath:(NSString *)path;
+- (instancetype)initWithDirectory:(NSString *)directory;
 
-- (BOOL)saveItem:(CZKVItem *)item;
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value;
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename;
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime;

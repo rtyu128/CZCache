@@ -19,8 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSString *filename;
 
 @property (nonatomic, assign) int size;
-@property (nonatomic, assign) long creationDate;
-@property (nonatomic, assign) NSTimeInterval lifeTime;
+@property (nonatomic, assign) long expireDate;
 
 - (BOOL)isValid;
 

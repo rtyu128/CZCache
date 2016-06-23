@@ -13,7 +13,10 @@
 
 @property (nonatomic, assign) BOOL errorLogsSwitch; // Default is YES.
 
-- (instancetype)initWithDirectory:(NSString *)directory;
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithDirectory:(NSString *)directory NS_DESIGNATED_INITIALIZER;
+
 
 - (BOOL)dbReset;
 

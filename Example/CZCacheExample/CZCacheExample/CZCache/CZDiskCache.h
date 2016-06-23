@@ -24,8 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 //@property BOOL errorLogsSwitch;
 
-- (nullable instancetype)initWithPath:(NSString *)path;
-- (nullable instancetype)initWithPath:(NSString *)path dbStoreThreshold:(NSUInteger) threshold;
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (nullable instancetype)initWithDirectory:(NSString *)directory;
+- (nullable instancetype)initWithDirectory:(NSString *)directory dbStoreThreshold:(NSUInteger)threshold NS_DESIGNATED_INITIALIZER;
 
 
 - (nullable id<NSCoding>)objectForKey:(NSString *)key;

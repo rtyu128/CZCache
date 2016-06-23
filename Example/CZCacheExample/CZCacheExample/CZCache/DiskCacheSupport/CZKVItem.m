@@ -12,9 +12,8 @@
 
 - (BOOL)isValid
 {
-    if (0 == self.lifeTime) return YES;
-    long now = time(NULL);
-    return (now - self.creationDate) <= self.lifeTime;
+    if (0 == self.expireDate) return YES;
+    return (time(NULL) <= self.expireDate);
 }
 
 @end

@@ -19,15 +19,14 @@
 
 static const NSUInteger kMaxOpenRetryCount = 8;
 static const NSTimeInterval kMinOpenRetryTimeInterval = 1.0;
-static NSString *const kDataBaseDirectory = @"CZCaches/DataBase";
-static NSString *const kDataBaseName = @"cacheDataBase.sqlite";
-static NSString *const kDataBaseShmFileName = @"cacheDataBase.sqlite-shm";
-static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
+static NSString *const kDataBaseName = @"KeyValueDataBase.sqlite";
+static NSString *const kDataBaseShmFileName = @"KeyValueDataBase.sqlite-shm";
+static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 
 @implementation CZKVDataBase {
-    NSString *storePath;
-    NSString *storeDirectory;
+    NSString *dbDirectory;
+    NSString *dbPath;
     
     sqlite3 *dataBase;
     CFMutableDictionaryRef dbStmtCache;
@@ -37,15 +36,10 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (instancetype)initWithDirectory:(NSString *)directory
 {
-    if (0 == directory.length) {
-        NSLog(@"CZKVDataBase init error: invalid directory (nil).");
-        return nil;
-    }
-    
+    // 不对directory检查空 在外部保证
     if (self = [super init]) {
-        storeDirectory = [directory stringByAppendingPathComponent:kDataBaseDirectory];
-        [[NSFileManager defaultManager] createDirectoryAtPath:storeDirectory withIntermediateDirectories:YES attributes:nil error:nil];
-        storePath = [storeDirectory stringByAppendingPathComponent:kDataBaseName];
+        dbDirectory = directory;
+        dbPath = [dbDirectory stringByAppendingPathComponent:kDataBaseName];
         _errorLogsSwitch = YES;
         dbOpenErrorCount = 0;
         dbLastOpenErrorTime = 0;
@@ -65,10 +59,10 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 - (BOOL)dbReset
 {
     if (![self dbClose]) return NO;
-    [[NSFileManager defaultManager] removeItemAtPath:storePath error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[storeDirectory stringByAppendingPathComponent:kDataBaseShmFileName]
+    [[NSFileManager defaultManager] removeItemAtPath:dbPath error:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseShmFileName]
                                                error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[storeDirectory stringByAppendingPathComponent:kDataBaseWalFileName]
+    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseWalFileName]
                                                error:nil];
     
     if ([self dbOpen] && [self dbInitialize]){
@@ -82,7 +76,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 {
     if (dataBase) return YES;
     
-    int result = sqlite3_open(storePath.UTF8String, &dataBase);
+    int result = sqlite3_open(dbPath.UTF8String, &dataBase);
     if (result == SQLITE_OK) {
         CFDictionaryKeyCallBacks keyCallbacks = kCFCopyStringDictionaryKeyCallBacks;
         CFDictionaryValueCallBacks valueCallbacks = {0};
@@ -153,7 +147,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (BOOL)dbInitialize
 {
-    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, creation_date integer, life_time integer default 0, primary key(key));";
+    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, expire_date integer default 0, primary key(key));";
     return [self dbExecute:initSql];
 }
 
@@ -204,7 +198,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime
 {
-    NSString *sqlStr = @"insert or replace into KeyValues (key, value_data, filename, size, creation_date, life_time) values (?1, ?2, ?3, ?4, ?5, ?6);";
+    NSString *sqlStr = @"insert or replace into KeyValues (key, value_data, filename, size, expire_date) values (?1, ?2, ?3, ?4, ?5);";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return NO;
     
@@ -218,9 +212,8 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     }
     sqlite3_bind_int(stmt, 4, (int)value.length);
     
-    long creationTime = time(NULL);
-    sqlite3_bind_int64(stmt, 5, creationTime);
-    sqlite3_bind_double(stmt, 6, lifetime);
+    long expireDate = lifetime > 0 ? time(NULL) + lifetime : 0;
+    sqlite3_bind_int64(stmt, 5, expireDate);
     
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
@@ -249,7 +242,7 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
 
 - (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
-    NSString *sqlStr = @"select key, value_data, filename, size, creation_Date, life_time from KeyValues where key = ?;";
+    NSString *sqlStr = @"select key, value_data, filename, size, expire_Date from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -275,16 +268,14 @@ static NSString *const kDataBaseWalFileName = @"cacheDataBase.sqlite-wal";
     int valueDataSize = sqlite3_column_bytes(stmt, i++);
     char *filename = (char *)sqlite3_column_text(stmt, i++);
     int size = sqlite3_column_int(stmt, i++);
-    long creationDate = sqlite3_column_int64(stmt, i++);
-    double lifeTime = sqlite3_column_double(stmt, i++);
+    long expireDate = sqlite3_column_int64(stmt, i++);
     
     CZKVItem *item = [[CZKVItem alloc] init];
     if (key) item.key = [NSString stringWithUTF8String:key];
     if (valueData && valueDataSize > 0) item.value = [NSData dataWithBytes:valueData length:valueDataSize];
     if (filename && *filename != 0) item.filename = [NSString stringWithUTF8String:filename];
     item.size = size;
-    item.creationDate = creationDate;
-    item.lifeTime = lifeTime;
+    item.expireDate = expireDate;
     return item;
 }
 

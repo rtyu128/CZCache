@@ -30,18 +30,21 @@ static NSString *MD5String (NSString *string) {
     
 }
 
-- (instancetype)initWithPath:(NSString *)path
+- (instancetype)initWithDirectory:(NSString *)directory
 {
-    return [self initWithPath:path dbStoreThreshold:16 * 1024];
+    return [self initWithDirectory:directory dbStoreThreshold:16 * 1024];
 }
 
-- (instancetype)initWithPath:(NSString *)path dbStoreThreshold:(NSUInteger)threshold
+- (instancetype)initWithDirectory:(NSString *)directory dbStoreThreshold:(NSUInteger)threshold
 {
     if (self = [super init]) {
-        kvStore = [[CZKVStore alloc] initWithPath:path];
+        [[NSFileManager defaultManager] createDirectoryAtPath:directory
+                                  withIntermediateDirectories:YES attributes:nil error:nil];
+        // 若目录创建成功
+        kvStore = [[CZKVStore alloc] initWithDirectory:directory];
         if (!kvStore) return nil;
         
-        _path = path;
+        _path = directory;
         lockSignal = dispatch_semaphore_create(1);
         _dbStoreThreshold = threshold;
         _countLimit = NSUIntegerMax;

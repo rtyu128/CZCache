@@ -21,12 +21,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (strong, readonly) CZDiskCache *diskCache;
 
-
-- (nullable instancetype)initWithName:(NSString *)name;
-- (nullable instancetype)initWithPath:(NSString *)path NS_DESIGNATED_INITIALIZER;
-
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
+- (nullable instancetype)initWithName:(NSString *)name directory:(nullable NSString *)directory NS_DESIGNATED_INITIALIZER;
+
 
 - (nullable ObjectType <NSCoding>)objectForKey:(KeyType)key;
 - (void)setObject:(nullable ObjectType <NSCoding>)object forKey:(KeyType)key;

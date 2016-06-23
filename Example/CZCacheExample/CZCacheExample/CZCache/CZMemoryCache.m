@@ -14,8 +14,7 @@
     @package
     id key;
     id value;
-    CFTimeInterval creationTime;
-    NSTimeInterval age;
+    CFTimeInterval expireDate;
     __unsafe_unretained CacheKVNode *prev;
     __unsafe_unretained CacheKVNode *next;
 }
@@ -219,15 +218,13 @@
     CFTimeInterval now = CACurrentMediaTime();
     if (node) {
         node->value = object;
-        node->creationTime = now;
-        node->age = age > 0 ? age : 0;
+        node->expireDate = age > 0 ? (now + age) : 0;
         [list bringNodeToHead:node];
     } else {
         node = [[CacheKVNode alloc] init];
         node->key = key;
         node->value = object;
-        node->creationTime = now;
-        node->age = age > 0 ? age : 0;
+        node->expireDate = age > 0 ? (now + age) : 0;
         CFDictionarySetValue(dict, (__bridge const void *)key, (__bridge const void *)node);
         [list insertNodeAtHead:node];
     }
@@ -242,7 +239,7 @@
     CacheKVNode *node = CFDictionaryGetValue(dict, (__bridge const void *)key);
     if (node) {
         CFTimeInterval now = CACurrentMediaTime();
-        if (0 == node->age || (now - node->creationTime <= node->age)) {
+        if (0 == node->expireDate || now <= node->expireDate) {
             [list bringNodeToHead:node];
         } else {
             node = nil;
@@ -380,7 +377,7 @@
     CFTimeInterval now = CACurrentMediaTime();
     CacheKVNode *node = list->head;
     while (node) {
-        if (node->age > 0 && (now - node->creationTime > node->age)) {
+        if (node->expireDate > 0 && now > node->expireDate) {
             [list removeNode:node];
             CFArrayAppendValue(holder, (__bridge const void *)node);
             CFDictionaryRemoveValue(dict, (__bridge const void *)(node->key));
