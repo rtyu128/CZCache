@@ -35,24 +35,6 @@
     return object;
 }
 
-- (void)objectForKey:(NSString *)key completion:(CZCacheObjectBlock)completion
-{
-    if (!completion) return;
-    id<NSCoding> object = [_memoryCache objectForKey:key];
-    if (object) {
-        
-    } else {
-        __weak typeof (&*self) weakSelf = self;
-        [_diskCache
-         objectForKey:key
-         completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object) {
-            __strong typeof (&*weakSelf) strongSelf = weakSelf;
-            if (!strongSelf) return;
-            completion(strongSelf, key, object);
-        }];
-    }
-}
-
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
 {
     [_memoryCache setObject:object forKey:key];
@@ -65,6 +47,21 @@
     [_diskCache setObject:object forKey:key lifetime:age];
 }
 
+- (void)removeObjectForKey:(NSString *)key
+{
+    [_memoryCache removeObjectForKey:key];
+    [_diskCache removeObjectForKey:key];
+}
+
+
+#pragma mark - AsyncAccess
+
+- (void)removeAllObjects
+{
+    [_memoryCache removeAllObjects];
+    [_diskCache removeAllObjects];
+}
+
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key age:(NSTimeInterval)age completion:(CZCacheObjectBlock)completion
 {
     [_memoryCache setObject:object forKey:key lifeTime:age];
@@ -75,25 +72,31 @@
          __strong typeof (&*weakSelf) strongSelf = weakSelf;
          if (!strongSelf) return;
          if (completion) completion(strongSelf, key, object);
-    }];
+     }];
 }
 
-- (void)removeObjectForKey:(NSString *)key
+- (void)objectForKey:(NSString *)key completion:(CZCacheObjectBlock)completion
 {
-    [_memoryCache removeObjectForKey:key];
-    [_diskCache removeObjectForKey:key];
+    if (!completion) return;
+    id<NSCoding> object = [_memoryCache objectForKey:key];
+    if (object) {
+        
+    } else {
+        __weak typeof (&*self) weakSelf = self;
+        [_diskCache
+         objectForKey:key
+         completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object) {
+             __strong typeof (&*weakSelf) strongSelf = weakSelf;
+             if (!strongSelf) return;
+             completion(strongSelf, key, object);
+         }];
+    }
 }
 
 - (void)removeObjectForKey:(NSString *)key completion:(void (^)(NSString *))completion
 {
     [_memoryCache removeObjectForKey:key];
     [_diskCache removeObjectForKey:key completion:completion];
-}
-
-- (void)removeAllObjects
-{
-    [_memoryCache removeAllObjects];
-    [_diskCache removeAllObjects];
 }
 
 - (void)removeAllObjectsAsync:(void (^)(void))completion

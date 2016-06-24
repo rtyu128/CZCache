@@ -22,7 +22,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 @property NSInteger countLimit;
 @property NSTimeInterval autoTrimInterval;
 
-
+@property BOOL enableExpireClean;
 @property BOOL releaseOnMainThread;
 @property BOOL releaseAsynchronously;
 

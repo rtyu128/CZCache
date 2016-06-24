@@ -137,9 +137,11 @@
 - (instancetype)initWithName:(NSString *)name
 {
     if (self = [super init]) {
-        _countLimit = NSIntegerMax;
+        _name = [name copy];
+        _countLimit = 20;//NSIntegerMax;
         autoTrimSwitch = YES;
         _autoTrimInterval = 20.0;
+        _enableExpireClean = YES;
         _releaseOnMainThread = NO;
         _releaseAsynchronously = YES;
         _shouldRemoveAllObjectsWhenMemoryWarning = YES;
@@ -372,6 +374,7 @@
 
 - (void)kExpireClean
 {
+    if (!_enableExpireClean) return;
     CFMutableArrayRef holder = CFArrayCreateMutable(CFAllocatorGetDefault(), 2, &kCFTypeArrayCallBacks);
     pthread_mutex_lock(&mutexLock);
     CFTimeInterval now = CACurrentMediaTime();
