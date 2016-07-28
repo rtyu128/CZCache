@@ -12,8 +12,9 @@
 #import "CZFileSupport.h"
 #import "CZKVDataBase.h"
 #import "CZKVItem.h"
+#import "CZCache.h"
 #import "ViewController.h"
-
+#import "CacheBenchmark.h"
 
 @interface AppDelegate ()
 
@@ -27,6 +28,15 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    [[CZCache standardCache] setObject:@"Asshole" forKey:@"abc"];
+    NSMutableData *dataValue = [NSMutableData new]; // 50KB
+    for (int i = 0; i < 50 * 1024; i++) {
+        [dataValue appendBytes:&i length:1];
+    }
+    [[CZCache standardCache] setObject:dataValue forKey:@"bigData"];
+
+    
     
     ViewController *rootVC = [[ViewController alloc] init];
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -115,6 +125,22 @@
 //    [_diskCache removeObjectForKey:@"nickName"];
 //    [_diskCache removeObjectForKey:@"Company"];
     [_diskCache removeObjectForKey:@"Hosts"];
+    
+    //NSLog(@"%@", MD5String(@"DocumentCache"));
+    //NSLog(@"%@", MD5String(@"CachesCache"));
+    
+    
+//    NSUserDefaults *test = [[NSUserDefaults alloc] initWithSuiteName:@"zxm.netease.com"];
+//    [test setObject:@1 forKey:@"key"];
+    
+//    CZCache *aaa = [CZCache standardCache];
+//    aaa[@"Str"] = @"abc";
+//    id<NSCoding> str = aaa[@"Str"];
+//    NSLog(@"%@", str);
+    
+    
+    //
+    //[CacheBenchmark benchmarkSetup];
     
     return YES;
 }

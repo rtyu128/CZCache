@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E801A16F1D115E5A00A4FB2F /* CZCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E801A16E1D115E5A00A4FB2F /* CZCache.m */; };
+		E81D0C941D2B4D2B004E360B /* CacheBenchmark.m in Sources */ = {isa = PBXBuildFile; fileRef = E81D0C931D2B4D2B004E360B /* CacheBenchmark.m */; };
 		E86593371D10112B0095A9D2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E86593361D10112B0095A9D2 /* main.m */; };
 		E865933A1D10112B0095A9D2 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E86593391D10112B0095A9D2 /* AppDelegate.m */; };
 		E865933D1D10112B0095A9D2 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E865933C1D10112B0095A9D2 /* ViewController.m */; };
@@ -45,6 +46,8 @@
 /* Begin PBXFileReference section */
 		E801A16D1D115E5A00A4FB2F /* CZCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZCache.h; sourceTree = "<group>"; };
 		E801A16E1D115E5A00A4FB2F /* CZCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZCache.m; sourceTree = "<group>"; };
+		E81D0C921D2B4D2B004E360B /* CacheBenchmark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CacheBenchmark.h; sourceTree = "<group>"; };
+		E81D0C931D2B4D2B004E360B /* CacheBenchmark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheBenchmark.m; sourceTree = "<group>"; };
 		E86593321D10112B0095A9D2 /* CZCacheExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CZCacheExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E86593361D10112B0095A9D2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E86593381D10112B0095A9D2 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -136,6 +139,8 @@
 				E86593431D10112B0095A9D2 /* LaunchScreen.storyboard */,
 				E86593461D10112B0095A9D2 /* Info.plist */,
 				E86593351D10112B0095A9D2 /* Supporting Files */,
+				E81D0C921D2B4D2B004E360B /* CacheBenchmark.h */,
+				E81D0C931D2B4D2B004E360B /* CacheBenchmark.m */,
 			);
 			path = CZCacheExample;
 			sourceTree = "<group>";
@@ -262,6 +267,7 @@
 				TargetAttributes = {
 					E86593311D10112B0095A9D2 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 9S8GGBDN4S;
 					};
 					E865934A1D10112B0095A9D2 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -328,6 +334,7 @@
 				E865933D1D10112B0095A9D2 /* ViewController.m in Sources */,
 				E8D982221D10E61A00E6BE47 /* CZKVStore.m in Sources */,
 				E86593761D1011DB0095A9D2 /* CZMemoryCache.m in Sources */,
+				E81D0C941D2B4D2B004E360B /* CacheBenchmark.m in Sources */,
 				E865933A1D10112B0095A9D2 /* AppDelegate.m in Sources */,
 				E8D982251D1132C100E6BE47 /* CZDiskCache.m in Sources */,
 				E8D982211D10E61A00E6BE47 /* CZKVItem.m in Sources */,
@@ -475,11 +482,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = CZCacheExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Anchor.CZCacheExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -487,11 +497,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = CZCacheExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = Anchor.CZCacheExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

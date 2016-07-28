@@ -7,8 +7,12 @@
 //
 
 #import "ViewController.h"
+#import "CZFileSupport.h"
+#import "CZCache.h"
+
 
 @interface ViewController ()
+
 
 @end
 
@@ -18,6 +22,9 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     self.view.backgroundColor = [UIColor greenColor];
+    
+    NSLog(@"%@", [[CZCache standardCache] objectForKey:@"abc"]);
+    
 }
 
 - (void)didReceiveMemoryWarning {
