@@ -21,6 +21,10 @@ typedef void  (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Null
 
 @property (assign, readonly) NSUInteger dbStoreThreshold;
 
+@property (nullable, copy) NSData *(^customArchiveBlock)(id object);
+@property (nullable, copy) id (^customUnarchiveBlock)(NSData *data);
+
+
 @property NSUInteger countLimit;
 
 @property NSUInteger sizeLimit;

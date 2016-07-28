@@ -9,6 +9,7 @@
 #import "CZDiskCache.h"
 #import "CZKVItem.h"
 #import "CZKVStore.h"
+#import <UIKit/UIKit.h>
 #import <CommonCrypto/CommonCrypto.h>
 
 static NSString *MD5String (NSString *string) {
@@ -24,11 +25,44 @@ static NSString *MD5String (NSString *string) {
             result[12], result[13], result[14], result[15]];
 }
 
+static NSMapTable<NSString *, CZDiskCache *> *globalDiskCaches;
+static dispatch_semaphore_t globalDiskCachesLock;
+
+static void CZDiskCachesPoolInit()
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        globalDiskCachesLock = dispatch_semaphore_create(1);
+        globalDiskCaches = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory
+                                                     valueOptions:NSPointerFunctionsWeakMemory
+                                                         capacity:1];
+    });
+}
+
+static CZDiskCache *dequeueReusableCacheWithKey(NSString *key)
+{
+    if (0 == key.length) return nil;
+    CZDiskCachesPoolInit();
+    dispatch_semaphore_wait(globalDiskCachesLock, DISPATCH_TIME_FOREVER);
+    CZDiskCache *cache = [globalDiskCaches objectForKey:key];
+    dispatch_semaphore_signal(globalDiskCachesLock);
+    return cache;
+}
+
+static void setReusableCache(CZDiskCache *cache)
+{
+    if (0 == cache.path.length) return;
+    CZDiskCachesPoolInit();
+    dispatch_semaphore_wait(globalDiskCachesLock, DISPATCH_TIME_FOREVER);
+    [globalDiskCaches setObject:cache forKey:cache.path];
+    dispatch_semaphore_signal(globalDiskCachesLock);
+}
+
+
 @implementation CZDiskCache {
     CZKVStore *kvStore;
     dispatch_queue_t accessQueue;
     dispatch_semaphore_t lockSignal;
-    
 }
 
 - (instancetype)initWithDirectory:(NSString *)directory
@@ -38,6 +72,8 @@ static NSString *MD5String (NSString *string) {
 
 - (instancetype)initWithDirectory:(NSString *)directory dbStoreThreshold:(NSUInteger)threshold
 {
+    CZDiskCache *reuseCache = dequeueReusableCacheWithKey(directory);
+    if (reuseCache) return reuseCache;
     if (self = [super init]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:directory
                                   withIntermediateDirectories:YES attributes:nil error:nil];
@@ -51,8 +87,27 @@ static NSString *MD5String (NSString *string) {
         _dbStoreThreshold = threshold;
         lockSignal = dispatch_semaphore_create(1);
         accessQueue = dispatch_queue_create("com.netease.memory", DISPATCH_QUEUE_CONCURRENT);
+        setReusableCache(self);
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(appWillTerminate:)
+                                                     name:UIApplicationWillTerminateNotification
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter]
+     removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
+}
+
+- (void)appWillTerminate:(NSNotification *)notification
+{
+    [self lock];
+    kvStore = nil;
+    [self unlock];
 }
 
 - (void)lock
@@ -79,7 +134,11 @@ static NSString *MD5String (NSString *string) {
     if (!item.value) return nil;
     
     id object = nil;
-    object = [NSKeyedUnarchiver unarchiveObjectWithData:item.value];
+    if (_customUnarchiveBlock) {
+        object = _customUnarchiveBlock(item.value);
+    } else {
+        object = [NSKeyedUnarchiver unarchiveObjectWithData:item.value];
+    }
     if (remainLife) *remainLife = item.remainLife;
     return object;
 }
@@ -109,7 +168,12 @@ static NSString *MD5String (NSString *string) {
         return;
     }
     
-    NSData *valueData = [NSKeyedArchiver archivedDataWithRootObject:object];
+    NSData *valueData = nil;
+    if (_customArchiveBlock) {
+        valueData = _customArchiveBlock(object);
+    } else {
+        valueData = [NSKeyedArchiver archivedDataWithRootObject:object];
+    }
     if (!valueData) return;
     
     NSString *filename = nil;
@@ -191,5 +255,13 @@ static NSString *MD5String (NSString *string) {
     return MD5String(key);
 }
 
+- (NSString *)description
+{
+    if (_name) {
+        return [NSString stringWithFormat:@"<%@: %p> [%@, %@]", [self class], self, _name, _path];
+    } else {
+        return [NSString stringWithFormat:@"<%@: %p> [%@]", [self class], self, _path];
+    }
+}
 
 @end
