@@ -9,15 +9,49 @@
 #import "CZCache.h"
 #import "CZFileSupport.h"
 
+static NSString *const kStandardCacheName = @"StandardCache";
+static NSString *const kDocumentCacheFolderName = @"DocumentCache";
+static NSString *const kCachesCacheFolderName = @"CachesCache";
+
 @implementation CZCache
+
++ (instancetype)standardCache
+{
+    static CZCache *standardCache;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        standardCache = [[CZCache alloc]
+                         initWithName:kStandardCacheName
+                         directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName]];
+        standardCache.memoryCache.countLimit = 40;
+    });
+    return standardCache;
+}
+
++ (instancetype)cacheInDocumentDirectoryWithName:(NSString *)name
+{
+    return [[CZCache alloc]
+            initWithName:name
+            directory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:kDocumentCacheFolderName]];
+}
+
++ (instancetype)cacheInCachesDirectoryWithName:(NSString *)name
+{
+    return [[CZCache alloc]
+            initWithName:name
+            directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName]];
+}
+
 
 - (instancetype)initWithName:(NSString *)name directory:(NSString *)directory
 {
     if (0 == name.length) return nil;
-    NSString *fileDirectory = 0 == directory.length ? [CZFileSupport cachesDirectory] : directory;
+    NSString *fileDirectory = directory.length > 0 ? directory :
+                              [[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName];
     if (self = [super init]) {
         _name = name;
-        _diskCache = [[CZDiskCache alloc] initWithDirectory:[fileDirectory stringByAppendingPathComponent:name]];
+        _storagePath = [fileDirectory stringByAppendingPathComponent:name];
+        _diskCache = [[CZDiskCache alloc] initWithDirectory:_storagePath];
         if (!_diskCache) return nil;
         _memoryCache = [[CZMemoryCache alloc] initWithName:name];
     }
@@ -53,6 +87,18 @@
     [_diskCache removeObjectForKey:key];
 }
 
+
+#pragma mark - Keyed Subscript Index
+
+- (id<NSCoding>)objectForKeyedSubscript:(NSString *)key
+{
+    return [self objectForKey:key];
+}
+
+- (void)setObject:(id<NSCoding>)object forKeyedSubscript:(NSString *)key
+{
+    [self setObject:object forKey:key];
+}
 
 #pragma mark - AsyncAccess
 
@@ -103,6 +149,15 @@
 {
     [_memoryCache removeAllObjects];
     [_diskCache removeAllObjectsAsync:completion];
+}
+
+- (NSString *)description
+{
+    if (_name) {
+        return [NSString stringWithFormat:@"<%@: %p> [%@, %@]", [self class], self, _name, _storagePath];
+    } else {
+        return [NSString stringWithFormat:@"<%@: %p> [%@]", [self class], self, _storagePath];
+    }
 }
 
 @end

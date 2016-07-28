@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable ObjectType<NSCoding> object);
 
 @property (copy, readonly) NSString *name;
+@property (readonly) NSString *storagePath;
 
 @property (strong, readonly) CZMemoryCache *memoryCache;
 
@@ -24,24 +25,32 @@ typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable Obje
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
++ (nullable instancetype)standardCache;
++ (nullable instancetype)cacheInDocumentDirectoryWithName:(NSString *)name;
++ (nullable instancetype)cacheInCachesDirectoryWithName:(NSString *)name;
 - (nullable instancetype)initWithName:(NSString *)name directory:(nullable NSString *)directory NS_DESIGNATED_INITIALIZER;
 
 
 - (nullable ObjectType<NSCoding>)objectForKey:(KeyType)key;
+- (nullable ObjectType<NSCoding>)objectForKeyedSubscript:(KeyType)key;
 
 - (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key;
 - (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key age:(NSTimeInterval)age;
+- (void)setObject:(nullable ObjectType<NSCoding>)object forKeyedSubscript:(KeyType)key;
 
 - (void)removeObjectForKey:(KeyType)key;
 - (void)removeAllObjects;
 
 @end
 
-@interface CZCache (AsyncAccess)
+@interface CZCache <KeyType:NSString *, ObjectType> (AsyncAccess)
 
-- (void)objectForKey:(NSString *)key completion:(CZCacheObjectBlock)completion;
-- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key age:(NSTimeInterval)age completion:(nullable CZCacheObjectBlock)completion;
-- (void)removeObjectForKey:(NSString *)key completion:(nullable void (^)(NSString *))completion;
+- (void)objectForKey:(KeyType)key completion:(CZCacheObjectBlock)completion;
+- (void)setObject:(nullable ObjectType<NSCoding>)object
+           forKey:(KeyType)key
+              age:(NSTimeInterval)age
+       completion:(nullable CZCacheObjectBlock)completion;
+- (void)removeObjectForKey:(KeyType)key completion:(nullable void (^)(NSString * key))completion;
 - (void)removeAllObjectsAsync:(nullable void (^)(void))completion;
 
 @end
