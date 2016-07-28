@@ -152,12 +152,14 @@
         dict = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         trimQueue = dispatch_queue_create("com.netease.memory", DISPATCH_QUEUE_SERIAL);
         
-        [[NSNotificationCenter defaultCenter]
-         addObserver:self selector:@selector(didReceiveMemoryWarningNotification:)
-         name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-        [[NSNotificationCenter defaultCenter]
-         addObserver:self selector:@selector(didEnterBackgroundNotification:)
-         name:UIApplicationDidEnterBackgroundNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(didReceiveMemoryWarningNotification:)
+                                                     name:UIApplicationDidReceiveMemoryWarningNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(didEnterBackgroundNotification:)
+                                                     name:UIApplicationDidEnterBackgroundNotification
+                                                   object:nil];
         
         [self autoTrim];
     }
@@ -230,18 +232,33 @@
         CFDictionarySetValue(dict, (__bridge const void *)key, (__bridge const void *)node);
         [list insertNodeAtHead:node];
     }
+    
+    if (list->totalCount > _countLimit) {
+        CacheKVNode *node = [list removeTailNode];
+        CFDictionaryRemoveValue(dict, (__bridge const void *)node->key);
+        if (_releaseAsynchronously) {
+            dispatch_queue_t queue = _releaseOnMainThread ?
+            dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            dispatch_async(queue, ^{
+                [node class];
+            });
+        } else if (_releaseOnMainThread && !pthread_main_np()) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [node class];
+            });
+        }
+    }
     pthread_mutex_unlock(&mutexLock);
-
 }
 
 - (nullable id)objectForKey:(id)key
-{   if (!key) return nil;
+{
+    if (!key) return nil;
     BOOL invalid = NO;
     pthread_mutex_lock(&mutexLock);
     CacheKVNode *node = CFDictionaryGetValue(dict, (__bridge const void *)key);
     if (node) {
-        CFTimeInterval now = CACurrentMediaTime();
-        if (0 == node->expireDate || now <= node->expireDate) {
+        if (0 == node->expireDate || CACurrentMediaTime() <= node->expireDate) {
             [list bringNodeToHead:node];
         } else {
             node = nil;
@@ -257,7 +274,6 @@
 - (void)removeObjectForKey:(id)key
 {
     if (!key) return;
-    
     pthread_mutex_lock(&mutexLock);
     CacheKVNode *node = CFDictionaryGetValue(dict, (__bridge const void *)key);
     if (node) {
@@ -265,13 +281,13 @@
         [list removeNode:node];
         if (_releaseAsynchronously) {
             dispatch_queue_t queue = _releaseOnMainThread ?
-                                     dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+            dispatch_get_main_queue() : dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
             dispatch_async(queue, ^{
-                [node description];
+                [node class];
             });
         } else if (_releaseOnMainThread && !pthread_main_np()) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [node description];
+                [node class];
             });
         }
     }
@@ -457,6 +473,15 @@
     BOOL result = _releaseAsynchronously;
     pthread_mutex_unlock(&mutexLock);
     return result;
+}
+
+- (NSString *)description
+{
+    if (_name) {
+        return [NSString stringWithFormat:@"<%@: %p> [name: %@]", [self class], self, _name];
+    } else {
+        return [NSString stringWithFormat:@"<%@: %p>", [self class], self];
+    }
 }
 
 @end

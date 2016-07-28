@@ -47,6 +47,7 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return self;
 }
 
+
 #pragma mark - File Support
 
 - (BOOL)cacheWriteData:(NSData *)data toFile:(NSString *)filename
