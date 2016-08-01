@@ -26,7 +26,6 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
 
 - (instancetype)initWithDirectory:(NSString *)directory
 {
-    // 不对directory检查空 在外部保证
     if (self = [super init]) {
         databaseDirectory = [directory stringByAppendingPathComponent:kDataBaseDirectoryName];
         valueFileDirectory = [directory stringByAppendingPathComponent:kValueFileDirectoryName];
@@ -34,15 +33,27 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
         
         trashQueue = dispatch_queue_create("com.netease.disk.trash", DISPATCH_QUEUE_SERIAL);
         
-        // 暂未处理目录创建失败
-        [[NSFileManager defaultManager] createDirectoryAtPath:databaseDirectory
-                                  withIntermediateDirectories:YES attributes:nil error:nil];
-        [[NSFileManager defaultManager] createDirectoryAtPath:valueFileDirectory
-                                  withIntermediateDirectories:YES attributes:nil error:nil];
-        [[NSFileManager defaultManager] createDirectoryAtPath:valueFileTrashDirectory
-                                  withIntermediateDirectories:YES attributes:nil error:nil];
-        // 若database目录创建成功则创建database
+        NSError *error = nil;
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:databaseDirectory
+                                       withIntermediateDirectories:YES
+                                                        attributes:nil
+                                                             error:&error] ||
+            ![[NSFileManager defaultManager] createDirectoryAtPath:valueFileDirectory
+                                       withIntermediateDirectories:YES
+                                                        attributes:nil
+                                                             error:&error] ||
+            ![[NSFileManager defaultManager] createDirectoryAtPath:valueFileTrashDirectory
+                                       withIntermediateDirectories:YES
+                                                        attributes:nil
+                                                             error:&error]) {
+                NSLog(@"CZKVStore directory create error:%@", error);
+                return nil;
+        }
+        
         db = [[CZKVDataBase alloc] initWithDirectory:databaseDirectory];
+        if (!db) {
+            if ([self cacheMoveAllFileToTrash]) [self cacheEmptyTrashAsync];
+        }
     }
     return self;
 }

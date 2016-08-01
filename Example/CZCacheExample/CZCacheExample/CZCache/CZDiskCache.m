@@ -186,7 +186,10 @@ static void setReusableCache(CZDiskCache *cache)
     [self unlock];
 }
 
-- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime completion:(CZDiskCacheObjectBlock)completion
+- (void)setObject:(id<NSCoding>)object
+           forKey:(NSString *)key
+         lifetime:(NSTimeInterval)lifetime
+       completion:(CZDiskCacheObjectBlock)completion
 {
     __weak typeof (&*self) weakSelf = self;
     dispatch_async(accessQueue, ^{

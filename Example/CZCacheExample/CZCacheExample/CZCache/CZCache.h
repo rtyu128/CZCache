@@ -14,8 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface CZCache <KeyType:NSString *, ObjectType> : NSObject
 
-typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable ObjectType<NSCoding> object);
-
 @property (copy, readonly) NSString *name;
 @property (readonly) NSString *storagePath;
 
@@ -43,7 +41,10 @@ typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable Obje
 
 @end
 
+
 @interface CZCache <KeyType:NSString *, ObjectType> (AsyncAccess)
+
+typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable ObjectType<NSCoding> object);
 
 - (void)objectForKey:(KeyType)key completion:(CZCacheObjectBlock)completion;
 - (void)setObject:(nullable ObjectType<NSCoding>)object
@@ -51,7 +52,7 @@ typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable Obje
               age:(NSTimeInterval)age
        completion:(nullable CZCacheObjectBlock)completion;
 - (void)removeObjectForKey:(KeyType)key completion:(nullable void (^)(NSString * key))completion;
-- (void)removeAllObjectsAsync:(nullable void (^)(void))completion;
+- (void)removeAllObjectsAsync:(nullable CZCacheNoParamsBlock)completion;
 
 @end
 

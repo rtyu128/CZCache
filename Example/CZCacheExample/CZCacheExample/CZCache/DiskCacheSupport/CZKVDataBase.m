@@ -36,7 +36,6 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (instancetype)initWithDirectory:(NSString *)directory
 {
-    // 不对directory检查空 在外部保证
     if (self = [super init]) {
         dbDirectory = directory;
         dbPath = [dbDirectory stringByAppendingPathComponent:kDataBaseName];
@@ -44,9 +43,14 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
         dbOpenErrorCount = 0;
         dbLastOpenErrorTime = 0;
         
-        //warning 先不考虑文件损坏数据库打开失败的情况
-        [self dbOpen];
-        [self dbInitialize];
+        if (![self dbOpen] || ![self dbInitialize]) {
+            if (![self dbReset]) {
+                [self dbClose];
+                [self dbCleanFiles];
+                NSLog(@"CZKVDataBase %s line %d: sqlite initialize error.", __func__, __LINE__);
+                return nil;
+            }
+        }
     }
     return self;
 }
@@ -59,17 +63,23 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 - (BOOL)dbReset
 {
     if (![self dbClose]) return NO;
-    [[NSFileManager defaultManager] removeItemAtPath:dbPath error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseShmFileName]
-                                               error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseWalFileName]
-                                               error:nil];
+    
+    [self dbCleanFiles];
     
     if ([self dbOpen] && [self dbInitialize]){
         return YES;
     } else {
         return NO;
     }
+}
+
+- (void)dbCleanFiles
+{
+    [[NSFileManager defaultManager] removeItemAtPath:dbPath error:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseShmFileName]
+                                               error:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:[dbDirectory stringByAppendingPathComponent:kDataBaseWalFileName]
+                                               error:nil];
 }
 
 - (BOOL)dbOpen
@@ -107,21 +117,21 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     
     int result = 0;
     BOOL retry = NO;
-    BOOL stmtFinalized = NO;
+    BOOL isStmtFinalized = NO;
     
     do {
         retry = NO;
         result = sqlite3_close(dataBase);
-        if (result == SQLITE_BUSY || result == SQLITE_LOCKED) {
-            if (!stmtFinalized) {
+        if (SQLITE_BUSY == result || SQLITE_LOCKED == result) {
+            if (!isStmtFinalized) {
                 sqlite3_stmt *stmt;
                 while ((stmt = sqlite3_next_stmt(dataBase, nil)) != 0) {
                     sqlite3_finalize(stmt);
                     retry = YES;
                 }
-                stmtFinalized = YES;
+                isStmtFinalized = YES;
             }
-        } else if (result != SQLITE_OK) {
+        } else if (SQLITE_OK != result) {
             if (_errorLogsSwitch) NSLog(@"%s line %d: database close faild (%d).", __func__, __LINE__, result);
         }
     } while (retry);

@@ -45,7 +45,7 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
 
 - (instancetype)initWithName:(NSString *)name directory:(NSString *)directory
 {
-    if (0 == name.length) return nil;
+    if (!name || 0 == name.length) return nil;
     NSString *fileDirectory = directory.length > 0 ? directory :
                               [[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName];
     if (self = [super init]) {
