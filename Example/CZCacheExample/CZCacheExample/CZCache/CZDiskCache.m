@@ -75,9 +75,15 @@ static void setReusableCache(CZDiskCache *cache)
     CZDiskCache *reuseCache = dequeueReusableCacheWithKey(directory);
     if (reuseCache) return reuseCache;
     if (self = [super init]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:directory
-                                  withIntermediateDirectories:YES attributes:nil error:nil];
-        // 若目录创建成功
+        NSError *error = nil;
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:directory
+                                       withIntermediateDirectories:YES
+                                                        attributes:nil
+                                                             error:&error]) {
+            NSLog(@"CZDiskCache directory create error:%@", error);
+            return nil;
+        }
+        
         kvStore = [[CZKVStore alloc] initWithDirectory:directory];
         if (!kvStore) return nil;
         
