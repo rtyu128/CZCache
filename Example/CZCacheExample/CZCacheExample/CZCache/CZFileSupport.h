@@ -14,16 +14,24 @@
 
 + (NSString *)homeDirectory;
 
-/* homeDirectory/Documents */
+/**
+ * homeDirectory/Documents 
+ */
 + (NSString *)documentDirectory;
 
-/* homeDirectory/Library */
+/**
+ * homeDirectory/Library 
+ */
 + (NSString *)libraryDirectory;
 
-/* homeDirectory/Library/Caches */
+/**
+ * homeDirectory/Library/Caches 
+ */
 + (NSString *)cachesDirectory;
 
-/* homeDirectory/tmp/ */
+/**
+ * homeDirectory/tmp/ 
+ */
 + (NSString *)temporaryDirectory;
 
 + (NSString *)documentPathWithFilename:(NSString *)filename;

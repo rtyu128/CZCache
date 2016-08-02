@@ -159,6 +159,12 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return NO;
 }
 
+
+- (NSData *)getItemValueForKey:(NSString *)key
+{
+    return [self getItemForKey:key].value;
+}
+
 - (CZKVItem *)getItemForKey:(NSString *)key
 {
     if (0 == key.length) return nil;
@@ -182,24 +188,6 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     }
     return item;
 }
-/*
-- (NSData *)getItemValueForKey:(NSString *)key
-{
-    if (0 == key.length) return nil;
-    NSData *value = nil;
-    NSString *filename = [db dbGetFilenameWithKey:key];
-    if (filename.length > 0) {
-        value = [self cacheDataFromFile:filename];
-        if (!value) {
-            [db dbDeleteItemWithKey:key];
-            value = nil;
-        }
-    } else {
-        value = [db dbGetValueForKey:key];
-    }
-    return value;
-}
-*/
 
 - (int)totalItemsCount
 {

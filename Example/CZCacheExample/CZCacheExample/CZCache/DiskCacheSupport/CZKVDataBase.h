@@ -28,7 +28,10 @@
 
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename;
-- (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime;
+- (BOOL)dbSaveItemWithKey:(NSString *)key
+                    value:(NSData *)value
+                 filename:(NSString *)filename
+                 lifetime:(NSTimeInterval)lifetime;
 
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key;
