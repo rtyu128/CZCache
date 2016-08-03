@@ -113,7 +113,10 @@
 
 @end
 
+static const NSUInteger kDefaultCountLimit = 50;//NSUIntegerMax
+static const NSTimeInterval kDefaultAutoTrimInterval = 10.0;
 
+#pragma mark - CZMemoryCache Implementation
 
 @implementation CZMemoryCache {
     pthread_mutex_t mutexLock;
@@ -138,9 +141,9 @@
 {
     if (self = [super init]) {
         _name = [name copy];
-        _countLimit = 20;//NSIntegerMax;
+        _countLimit = kDefaultCountLimit;
         autoTrimSwitch = YES;
-        _autoTrimInterval = 20.0;
+        _autoTrimInterval = kDefaultAutoTrimInterval;
         _enableExpireClean = YES;
         _releaseOnMainThread = NO;
         _releaseAsynchronously = YES;
@@ -209,7 +212,7 @@
     [self setObject:object forKey:key lifeTime:0];
 }
 
-- (void)setObject:(id)object forKey:(id)key lifeTime:(NSTimeInterval)age
+- (void)setObject:(id)object forKey:(id)key lifeTime:(NSTimeInterval)lifetime
 {
     if (!key) return;
     if (!object) {
@@ -222,13 +225,13 @@
     CFTimeInterval now = CACurrentMediaTime();
     if (node) {
         node->value = object;
-        node->expireDate = age > 0 ? (now + age) : 0;
+        node->expireDate = lifetime > 0 ? (now + lifetime) : 0;
         [list bringNodeToHead:node];
     } else {
         node = [[CacheKVNode alloc] init];
         node->key = key;
         node->value = object;
-        node->expireDate = age > 0 ? (now + age) : 0;
+        node->expireDate = lifetime > 0 ? (now + lifetime) : 0;
         CFDictionarySetValue(dict, (__bridge const void *)key, (__bridge const void *)node);
         [list insertNodeAtHead:node];
     }
@@ -251,7 +254,7 @@
     pthread_mutex_unlock(&mutexLock);
 }
 
-- (nullable id)objectForKey:(id)key
+- (id)objectForKey:(id)key
 {
     if (!key) return nil;
     BOOL invalid = NO;
@@ -269,6 +272,11 @@
     
     if (invalid) [self removeObjectForKey:key];
     return node ? node->value : nil;
+}
+
+- (BOOL)containsObjectForKey:(id)key
+{
+    return [self objectForKey:key] ? YES : NO;
 }
 
 - (void)removeObjectForKey:(id)key

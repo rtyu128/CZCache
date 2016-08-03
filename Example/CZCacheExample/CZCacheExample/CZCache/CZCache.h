@@ -12,6 +12,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ Thanks for ibireme and his powerful YYCache:
+ https://github.com/ibireme/YYCache
+ */
 @interface CZCache <KeyType:NSString *, ObjectType> : NSObject
 
 @property (copy, readonly) NSString *name;

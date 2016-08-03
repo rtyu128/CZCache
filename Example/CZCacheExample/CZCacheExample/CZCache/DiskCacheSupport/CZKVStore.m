@@ -159,7 +159,6 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return NO;
 }
 
-
 - (NSData *)getItemValueForKey:(NSString *)key
 {
     return [self getItemForKey:key].value;

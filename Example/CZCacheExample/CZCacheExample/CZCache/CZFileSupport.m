@@ -44,7 +44,7 @@
     }
 }
 
-+ (float)fileSizeWithDirectory:(NSString *)directory
++ (CGFloat)fileSizeWithDirectory:(NSString *)directory
 {
     if (!directory) return 0.0;
     
