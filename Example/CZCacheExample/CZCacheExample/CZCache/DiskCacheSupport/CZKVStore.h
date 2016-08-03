@@ -11,8 +11,21 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class CZKVItem;
+
+/**
+ CZKVStore is a key-value storage based on sqlite and file system.
+ Generally, there is no need to use this class directly.
+ */
 @interface CZKVStore : NSObject
 
+/**
+ Designated initializer for CZKVStore.
+ After initialized, folders in the directory will as follow:
+    directory
+             /database(store sqlite files)
+             /value(store value files)
+             /asshole(store trash files temporarily)
+ */
 - (instancetype)initWithDirectory:(NSString *)directory;
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value;

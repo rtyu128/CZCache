@@ -163,7 +163,7 @@ static void setReusableCache(CZDiskCache *cache)
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
 {
-    [self setObject:object forKey:key lifetime:LIVE_FFOREVER];
+    [self setObject:object forKey:key lifetime:CZ_LIVE_FFOREVER];
 }
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime

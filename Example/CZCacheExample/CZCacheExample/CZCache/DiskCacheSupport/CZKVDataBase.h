@@ -8,15 +8,32 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class CZKVItem;
+/**
+ CZKVDataBase is only a single SQLite database. Used for storing CZKVItem.
+ If you need to handle complex task with database, maybe FMDB or CoreData is the best choice.
+ 
+ Thanks for sqlite3's authors and their great works.
+ */
 @interface CZKVDataBase : NSObject
 
 @property (nonatomic, assign) BOOL errorLogsSwitch; // Default is YES.
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
-- (instancetype)initWithDirectory:(NSString *)directory NS_DESIGNATED_INITIALIZER;
 
+/**
+ Designated initializer for CZKVDATABase.
+ After initialized, files in the directory will as follow:
+    directory
+             /KeyValueDataBase.sqlite
+             /KeyValueDataBase.sqlite-shm
+             /KeyValueDataBase.sqlite-wal
+ @Improtant: Directory must exist.
+ */
+- (instancetype)initWithDirectory:(NSString *)directory NS_DESIGNATED_INITIALIZER;
 
 - (BOOL)dbReset;
 
@@ -26,21 +43,21 @@
 
 - (void)dbCheckpoint;
 
+- (nullable CZKVItem *)dbGetItemForKey:(NSString *)key;
 
-- (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename;
+- (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(nullable NSString *)filename;
 - (BOOL)dbSaveItemWithKey:(NSString *)key
                     value:(NSData *)value
-                 filename:(NSString *)filename
+                 filename:(nullable NSString *)filename
                  lifetime:(NSTimeInterval)lifetime;
-
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key;
 
-- (CZKVItem *)dbGetItemForKey:(NSString *)key;
-
-- (NSString *)dbGetFilenameWithKey:(NSString *)key;
+- (nullable NSString *)dbGetFilenameWithKey:(NSString *)key;
 
 - (int)dbGetTotalItemSize;
 - (int)dbGetTotalItemCount;
 
 @end
+
+NS_ASSUME_NONNULL_END

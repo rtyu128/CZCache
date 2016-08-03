@@ -111,7 +111,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 - (nullable ObjectType)objectForKey:(KeyType)key;
 
 /**
- Returns a boolean value that indicates whether a given key's associated value is in cache.
+ Returns a boolean value indicates whether a given key's associated value is in cache.
  
  @param key: The key which you want to check, if nil return NO.
  @return whether the key's associated value is in cache.

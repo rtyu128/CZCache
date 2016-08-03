@@ -47,7 +47,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
             if (![self dbReset]) {
                 [self dbClose];
                 [self dbCleanFiles];
-                NSLog(@"CZKVDataBase %s line %d: sqlite initialize error.", __func__, __LINE__);
+                if (_errorLogsSwitch) NSLog(@"CZKVDataBase %s line %d: sqlite initialize error.", __func__, __LINE__);
                 return nil;
             }
         }
@@ -203,7 +203,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:LIVE_FFOREVER];
+    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FFOREVER];
 }
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime

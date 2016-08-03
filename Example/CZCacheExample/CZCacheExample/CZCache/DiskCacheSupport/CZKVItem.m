@@ -22,7 +22,7 @@
         return 0;
     } else {
         NSTimeInterval remainTime = self.expireDate - time(NULL);
-        return remainTime > 0 ? remainTime : -1;
+        return remainTime > 0 ? remainTime : -1.0;
     }
 }
 
