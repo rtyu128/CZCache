@@ -126,6 +126,10 @@ static void setReusableCache(CZDiskCache *cache)
     dispatch_semaphore_signal(lockSignal);
 }
 
+
+#pragma mark - Public
+#pragma mark - Access Methods
+
 - (id<NSCoding>)objectForKey:(NSString *)key
 {
     return [self objectForKey:key remainLife:NULL];
@@ -149,22 +153,9 @@ static void setReusableCache(CZDiskCache *cache)
     return object;
 }
 
-- (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion
-{
-    if (!completion) return;
-    __weak typeof (&*self) weakSelf = self;
-    dispatch_async(accessQueue, ^{
-        __strong typeof (&*weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) return;
-        NSTimeInterval remainLife = 0.0;
-        id<NSCoding> object = [self objectForKey:key remainLife:&remainLife];
-        completion(strongSelf, key, object, remainLife);
-    });
-}
-
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
 {
-    [self setObject:object forKey:key lifetime:CZ_LIVE_FFOREVER];
+    [self setObject:object forKey:key lifetime:CZ_LIVE_FOREVER];
 }
 
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime
@@ -193,6 +184,37 @@ static void setReusableCache(CZDiskCache *cache)
     [self unlock];
 }
 
+- (void)removeObjectForKey:(NSString *)key
+{
+    if (!key) return;
+    [self lock];
+    [kvStore removeItemForKey:key];
+    [self unlock];
+}
+
+- (void)removeAllObjects
+{
+    [self lock];
+    [kvStore removeAllItems];
+    [self unlock];
+}
+
+
+#pragma mark - Async Access Methods
+
+- (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion
+{
+    if (!completion) return;
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSTimeInterval remainLife = 0.0;
+        id<NSCoding> object = [self objectForKey:key remainLife:&remainLife];
+        completion(strongSelf, key, object, remainLife);
+    });
+}
+
 - (void)setObject:(id<NSCoding>)object
            forKey:(NSString *)key
          lifetime:(NSTimeInterval)lifetime
@@ -207,14 +229,6 @@ static void setReusableCache(CZDiskCache *cache)
     });
 }
 
-- (void)removeObjectForKey:(NSString *)key
-{
-    if (!key) return;
-    [self lock];
-    [kvStore removeItemForKey:key];
-    [self unlock];
-}
-
 - (void)removeObjectForKey:(NSString *)key completion:(void (^)(NSString *key))completion
 {
     __weak typeof (&*self) weakSelf = self;
@@ -224,13 +238,6 @@ static void setReusableCache(CZDiskCache *cache)
         [self removeObjectForKey:key];
         if (completion) completion(key);
     });
-}
-
-- (void)removeAllObjects
-{
-    [self lock];
-    [kvStore removeAllItems];
-    [self unlock];
 }
 
 - (void)removeAllObjectsAsync:(void (^)(void))completion
@@ -243,6 +250,9 @@ static void setReusableCache(CZDiskCache *cache)
         if (completion) completion();
     });
 }
+
+
+#pragma mark - Getter
 
 - (NSInteger)totalCount
 {

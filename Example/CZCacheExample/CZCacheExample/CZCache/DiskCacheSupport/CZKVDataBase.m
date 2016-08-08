@@ -203,7 +203,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FFOREVER];
+    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER];
 }
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime

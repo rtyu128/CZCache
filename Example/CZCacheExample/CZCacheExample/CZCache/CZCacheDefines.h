@@ -9,6 +9,7 @@
 #ifndef CZCacheDefines_h
 #define CZCacheDefines_h
 
-static const NSTimeInterval CZ_LIVE_FFOREVER = 0.0;
+// Forever life time identifier
+static const NSTimeInterval CZ_LIVE_FOREVER = 0.0;
 
 #endif /* CZCacheDefines_h */

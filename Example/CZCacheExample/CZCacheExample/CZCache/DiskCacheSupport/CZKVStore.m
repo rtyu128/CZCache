@@ -112,12 +112,12 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value
 {
-    return [self saveItemWithKey:key value:value filename:nil lifetime:CZ_LIVE_FFOREVER];
+    return [self saveItemWithKey:key value:value filename:nil lifetime:CZ_LIVE_FOREVER];
 }
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    return [self saveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FFOREVER];
+    return [self saveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER];
 }
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime

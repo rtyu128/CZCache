@@ -100,7 +100,8 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     [self setObject:object forKey:key];
 }
 
-#pragma mark - AsyncAccess
+
+#pragma mark - Async Access Methods
 
 - (void)removeAllObjects
 {
