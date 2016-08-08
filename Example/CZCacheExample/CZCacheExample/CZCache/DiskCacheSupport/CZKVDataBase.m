@@ -157,7 +157,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (BOOL)dbInitialize
 {
-    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, expire_date integer default 0, primary key(key));";
+    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, expire_date integer default 0, extended_data blob, primary key(key));";
     return [self dbExecute:initSql];
 }
 
@@ -203,12 +203,16 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER];
+    return [self dbSaveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER extendedData:nil];
 }
 
-- (BOOL)dbSaveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime
+- (BOOL)dbSaveItemWithKey:(NSString *)key
+                    value:(NSData *)value
+                 filename:(NSString *)filename
+                 lifetime:(NSTimeInterval)lifetime
+             extendedData:(NSData *)extendedData
 {
-    NSString *sqlStr = @"insert or replace into KeyValues (key, value_data, filename, size, expire_date) values (?1, ?2, ?3, ?4, ?5);";
+    NSString *sqlStr = @"insert or replace into KeyValues (key, value_data, filename, size, expire_date, extended_data) values (?1, ?2, ?3, ?4, ?5, ?6);";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return NO;
     
@@ -224,6 +228,13 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     
     long expireDate = lifetime > 0 ? time(NULL) + lifetime : 0;
     sqlite3_bind_int64(stmt, 5, expireDate);
+    
+    if (extendedData) {
+        sqlite3_bind_blob(stmt, 6, extendedData.bytes, (int)extendedData.length, 0);
+    } else {
+        sqlite3_bind_blob(stmt, 6, NULL, 0, NULL);
+    }
+    
     
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
@@ -252,7 +263,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
-    NSString *sqlStr = @"select key, value_data, filename, size, expire_Date from KeyValues where key = ?;";
+    NSString *sqlStr = @"select key, value_data, filename, size, expire_Date, extended_data from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -279,6 +290,8 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     char *filename = (char *)sqlite3_column_text(stmt, i++);
     int size = sqlite3_column_int(stmt, i++);
     long expireDate = sqlite3_column_int64(stmt, i++);
+    const void *extendedData = sqlite3_column_blob(stmt, i);
+    int extendedDataSize = sqlite3_column_bytes(stmt, i++);
     
     CZKVItem *item = [[CZKVItem alloc] init];
     if (key) item.key = [NSString stringWithUTF8String:key];
@@ -286,6 +299,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     if (filename && *filename != 0) item.filename = [NSString stringWithUTF8String:filename];
     item.size = size;
     item.expireDate = expireDate;
+    if (extendedData && extendedDataSize > 0) item.extendedData = [NSData dataWithBytes:extendedData length:extendedDataSize];
     return item;
 }
 

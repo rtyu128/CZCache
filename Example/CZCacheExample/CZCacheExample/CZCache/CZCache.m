@@ -69,14 +69,48 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     return object;
 }
 
+- (NSString *)descriptionForKeyValue:(NSString *)aKey
+{
+    NSData *data = [CZDiskCache extendedDataForObject:[self objectForKey:aKey]];
+    if (data) {
+        return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    } else {
+        return nil;
+    }
+}
+
+- (NSData *)extendedDataForKeyValue:(NSString *)aKey
+{
+    return [CZDiskCache extendedDataForObject:[self objectForKey:aKey]];
+}
+
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
 {
     [_memoryCache setObject:object forKey:key];
     [_diskCache setObject:object forKey:key];
 }
 
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key description:(NSString *)desc
+{
+    if (desc && desc.length > 0) {
+        [CZDiskCache setExtendedData:[desc dataUsingEncoding:NSUTF8StringEncoding] forObject:object];
+    }
+    [_memoryCache setObject:object forKey:key];
+    [_diskCache setObject:object forKey:key];
+}
+
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifeTime:(NSTimeInterval)lifetime
 {
+    [_memoryCache setObject:object forKey:key lifeTime:lifetime];
+    [_diskCache setObject:object forKey:key lifetime:lifetime];
+}
+
+- (void)setObject:(id<NSCoding>)object
+           forKey:(NSString *)key
+         lifeTime:(NSTimeInterval)lifetime
+     extendedData:(NSData *)extendedData
+{
+    if (extendedData) [CZDiskCache setExtendedData:extendedData forObject:object];
     [_memoryCache setObject:object forKey:key lifeTime:lifetime];
     [_diskCache setObject:object forKey:key lifetime:lifetime];
 }

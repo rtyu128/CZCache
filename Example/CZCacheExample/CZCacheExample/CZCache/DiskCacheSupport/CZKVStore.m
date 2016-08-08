@@ -112,21 +112,25 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value
 {
-    return [self saveItemWithKey:key value:value filename:nil lifetime:CZ_LIVE_FOREVER];
+    return [self saveItemWithKey:key value:value filename:nil lifetime:CZ_LIVE_FOREVER extendedData:nil];
 }
 
 - (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename
 {
-    return [self saveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER];
+    return [self saveItemWithKey:key value:value filename:filename lifetime:CZ_LIVE_FOREVER extendedData:nil];
 }
 
-- (BOOL)saveItemWithKey:(NSString *)key value:(NSData *)value filename:(NSString *)filename lifetime:(NSTimeInterval)lifetime
+- (BOOL)saveItemWithKey:(NSString *)key
+                  value:(NSData *)value
+               filename:(NSString *)filename
+               lifetime:(NSTimeInterval)lifetime
+           extendedData:(NSData *)extendedData
 {
     if (0 == key.length || 0 == value.length) return NO;
     
     if (filename.length > 0) {
         if ([self cacheWriteData:value toFile:filename]) {
-            if ([db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime]) {
+            if ([db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime extendedData:extendedData]) {
                 return YES;
             } else {
                 [self cacheDeleteFile:filename];
@@ -134,7 +138,7 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
         }
         return NO;
     } else {
-        return [db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime];
+        return [db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime extendedData:extendedData];
     }
 }
 

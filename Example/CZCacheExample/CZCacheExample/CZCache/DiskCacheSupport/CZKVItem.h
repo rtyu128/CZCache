@@ -31,6 +31,9 @@ NS_ASSUME_NONNULL_BEGIN
 // The expireDate of key-value pair. Equal to secends from 1970-01-01 8:00 to deadline(UTC).
 @property (nonatomic, assign) long expireDate;
 
+// The extended date of key-value pair(e.g.Description).
+@property (nonatomic, strong, nullable) NSData *extendedData;
+
 // Returns a boolean value indicates whether the key-value pair is valid.
 - (BOOL)isValid;
 

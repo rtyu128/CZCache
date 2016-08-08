@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  Thanks for ibireme and his powerful YYCache:
  https://github.com/ibireme/YYCache
  */
-@interface CZCache <KeyType:NSString *, ObjectType> : NSObject
+@interface CZCache : NSObject
 
 @property (copy, readonly) NSString *name;
 @property (readonly) NSString *storagePath;
@@ -34,29 +34,37 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithName:(NSString *)name directory:(nullable NSString *)directory NS_DESIGNATED_INITIALIZER;
 
 
-- (nullable ObjectType<NSCoding>)objectForKey:(KeyType)key;
-- (nullable ObjectType<NSCoding>)objectForKeyedSubscript:(KeyType)key;
+- (nullable id<NSCoding>)objectForKey:(NSString *)key;
+- (nullable NSString *)descriptionForKeyValue:(NSString *)aKey;
+- (nullable NSData *)extendedDataForKeyValue:(NSString *)aKey;
 
-- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key;
-- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key lifeTime:(NSTimeInterval)lifetime;
-- (void)setObject:(nullable ObjectType<NSCoding>)object forKeyedSubscript:(KeyType)key;
+- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key;
+- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key description:(NSString *)desc;
+- (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key lifeTime:(NSTimeInterval)lifetime;
+- (void)setObject:(nullable id<NSCoding>)object
+           forKey:(NSString *)key
+         lifeTime:(NSTimeInterval)lifetime
+     extendedData:(NSData *)extendedData;
 
-- (void)removeObjectForKey:(KeyType)key;
+- (nullable id<NSCoding>)objectForKeyedSubscript:(NSString *)key;
+- (void)setObject:(nullable id<NSCoding>)object forKeyedSubscript:(NSString *)key;
+
+- (void)removeObjectForKey:(NSString *)key;
 - (void)removeAllObjects;
 
 @end
 
 
-@interface CZCache <KeyType:NSString *, ObjectType> (AsyncAccess)
+@interface CZCache (CZCacheAsyncAccess)
 
-typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable ObjectType<NSCoding> object);
+typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable id<NSCoding> object);
 
-- (void)objectForKey:(KeyType)key completion:(CZCacheObjectBlock)completion;
-- (void)setObject:(nullable ObjectType<NSCoding>)object
-           forKey:(KeyType)key
+- (void)objectForKey:(NSString *)key completion:(CZCacheObjectBlock)completion;
+- (void)setObject:(nullable id<NSCoding>)object
+           forKey:(NSString *)key
          lifeTime:(NSTimeInterval)lifetime
        completion:(nullable CZCacheObjectBlock)completion;
-- (void)removeObjectForKey:(KeyType)key completion:(nullable void (^)(NSString * key))completion;
+- (void)removeObjectForKey:(NSString *)key completion:(nullable void (^)(NSString * key))completion;
 - (void)removeAllObjectsAsync:(nullable CZCacheNoParamsBlock)completion;
 
 @end

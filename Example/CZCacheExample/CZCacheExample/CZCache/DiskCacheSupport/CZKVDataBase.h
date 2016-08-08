@@ -49,7 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)dbSaveItemWithKey:(NSString *)key
                     value:(NSData *)value
                  filename:(nullable NSString *)filename
-                 lifetime:(NSTimeInterval)lifetime;
+                 lifetime:(NSTimeInterval)lifetime
+             extendedData:(nullable NSData *)extendedData;
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key;
 

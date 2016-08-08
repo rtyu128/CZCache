@@ -6,11 +6,12 @@
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
 
+#import <UIKit/UIKit.h>
+#import <objc/runtime.h>
+#import <CommonCrypto/CommonCrypto.h>
 #import "CZDiskCache.h"
 #import "CZKVItem.h"
 #import "CZKVStore.h"
-#import <UIKit/UIKit.h>
-#import <CommonCrypto/CommonCrypto.h>
 
 static NSString *MD5String (NSString *string) {
     if (!string) return nil;
@@ -149,7 +150,11 @@ static void setReusableCache(CZDiskCache *cache)
     } else {
         object = [NSKeyedUnarchiver unarchiveObjectWithData:item.value];
     }
+    if (object && item.extendedData) {
+        [CZDiskCache setExtendedData:item.extendedData forObject:object];
+    }
     if (remainLife) *remainLife = item.remainLife;
+    
     return object;
 }
 
@@ -166,6 +171,7 @@ static void setReusableCache(CZDiskCache *cache)
         return;
     }
     
+    NSData *extendedData = [CZDiskCache extendedDataForObject:object];
     NSData *valueData = nil;
     if (_customArchiveBlock) {
         valueData = _customArchiveBlock(object);
@@ -180,7 +186,7 @@ static void setReusableCache(CZDiskCache *cache)
     }
     
     [self lock];
-    [kvStore saveItemWithKey:key value:valueData filename:filename lifetime:lifetime];
+    [kvStore saveItemWithKey:key value:valueData filename:filename lifetime:lifetime extendedData:extendedData];
     [self unlock];
 }
 
@@ -273,6 +279,23 @@ static void setReusableCache(CZDiskCache *cache)
 - (NSString *)filenameForKey:(NSString *)key
 {
     return MD5String(key);
+}
+
+
+#pragma mark - CZExtendedData
+
+static void *kExtendedDataKey = "kExtendedDataKey";
+
++ (NSData *)extendedDataForObject:(id)anObject
+{
+    if (!anObject) return nil;
+    return (NSData *)objc_getAssociatedObject(anObject, kExtendedDataKey);
+}
+
++ (void)setExtendedData:(NSData *)extendedData forObject:(id)anObject
+{
+    if (!anObject) return;
+    objc_setAssociatedObject(anObject, kExtendedDataKey, extendedData, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)description

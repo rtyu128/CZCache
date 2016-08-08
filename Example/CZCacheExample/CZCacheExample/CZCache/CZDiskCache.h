@@ -51,7 +51,7 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 
 @end
 
-@interface CZDiskCache (AsyncAccess)
+@interface CZDiskCache (CZDiskAsyncAccess)
 
 - (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion;
 - (void)setObject:(id<NSCoding>)object
@@ -63,5 +63,11 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 
 @end
 
+@interface CZDiskCache (CZExtendedData)
+
++ (NSData *)extendedDataForObject:(id)anObject;
++ (void)setExtendedData:(nullable NSData *)extendedData forObject:(id)anObject;
+
+@end
 
 NS_ASSUME_NONNULL_END
