@@ -156,8 +156,9 @@ static void setReusableCache(CZDiskCache *cache)
     dispatch_async(accessQueue, ^{
         __strong typeof (&*weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
-        id<NSCoding> object = [self objectForKey:key];
-        completion(strongSelf, key, object);
+        NSTimeInterval remainLife = 0.0;
+        id<NSCoding> object = [self objectForKey:key remainLife:&remainLife];
+        completion(strongSelf, key, object, remainLife);
     });
 }
 
@@ -202,7 +203,7 @@ static void setReusableCache(CZDiskCache *cache)
         __strong typeof (&*weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         [self setObject:object forKey:key lifetime:lifetime];
-        if (completion) completion(strongSelf, key, object);
+        if (completion) completion(strongSelf, key, object, lifetime);
     });
 }
 

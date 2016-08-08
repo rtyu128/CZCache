@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "CZMemoryCache.h"
 #import "CZDiskCache.h"
+#import "CZCacheDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -37,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ObjectType<NSCoding>)objectForKeyedSubscript:(KeyType)key;
 
 - (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key;
-- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key age:(NSTimeInterval)age;
+- (void)setObject:(nullable ObjectType<NSCoding>)object forKey:(KeyType)key lifeTime:(NSTimeInterval)lifetime;
 - (void)setObject:(nullable ObjectType<NSCoding>)object forKeyedSubscript:(KeyType)key;
 
 - (void)removeObjectForKey:(KeyType)key;
@@ -53,7 +54,7 @@ typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable Obje
 - (void)objectForKey:(KeyType)key completion:(CZCacheObjectBlock)completion;
 - (void)setObject:(nullable ObjectType<NSCoding>)object
            forKey:(KeyType)key
-              age:(NSTimeInterval)age
+         lifeTime:(NSTimeInterval)lifetime
        completion:(nullable CZCacheObjectBlock)completion;
 - (void)removeObjectForKey:(KeyType)key completion:(nullable void (^)(NSString * key))completion;
 - (void)removeAllObjectsAsync:(nullable CZCacheNoParamsBlock)completion;

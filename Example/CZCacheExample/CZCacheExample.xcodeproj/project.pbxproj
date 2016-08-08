@@ -77,6 +77,7 @@
 		E8D9821F1D10E61A00E6BE47 /* CZKVStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZKVStore.m; sourceTree = "<group>"; };
 		E8D982231D1132C100E6BE47 /* CZDiskCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZDiskCache.h; sourceTree = "<group>"; };
 		E8D982241D1132C100E6BE47 /* CZDiskCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CZDiskCache.m; sourceTree = "<group>"; };
+		E8E2C17D1D51D4A3004A190E /* CZCacheDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CZCacheDefines.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,6 +178,7 @@
 				E8D982191D10E61A00E6BE47 /* DiskCacheSupport */,
 				E801A16D1D115E5A00A4FB2F /* CZCache.h */,
 				E801A16E1D115E5A00A4FB2F /* CZCache.m */,
+				E8E2C17D1D51D4A3004A190E /* CZCacheDefines.h */,
 				E8D982161D10E60E00E6BE47 /* CZFileSupport.h */,
 				E8D982171D10E60E00E6BE47 /* CZFileSupport.m */,
 				E86593711D1011DB0095A9D2 /* CZMemoryCache.h */,

@@ -6,8 +6,9 @@
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
 
-#import "CZMemoryCache.h"
 #import <UIKit/UIKit.h>
+#import "CZMemoryCache.h"
+#import "CZCacheDefines.h"
 #import <pthread.h>
 
 @interface CacheKVNode : NSObject {
@@ -113,8 +114,10 @@
 
 @end
 
-static const NSUInteger kDefaultCountLimit = 50;//NSUIntegerMax
-static const NSTimeInterval kDefaultAutoTrimInterval = 10.0;
+
+static const NSUInteger kMCDefaultCountLimit = 50;//NSUIntegerMax
+static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
+
 
 #pragma mark - CZMemoryCache Implementation
 
@@ -141,9 +144,9 @@ static const NSTimeInterval kDefaultAutoTrimInterval = 10.0;
 {
     if (self = [super init]) {
         _name = [name copy];
-        _countLimit = kDefaultCountLimit;
+        _countLimit = kMCDefaultCountLimit;
         autoTrimSwitch = YES;
-        _autoTrimInterval = kDefaultAutoTrimInterval;
+        _autoTrimInterval = kMCDefaultAutoTrimInterval;
         _enableExpireClean = YES;
         _releaseOnMainThread = NO;
         _releaseAsynchronously = YES;

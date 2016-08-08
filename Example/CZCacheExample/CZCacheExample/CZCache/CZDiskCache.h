@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class CZDiskCache;
 typedef void (^CZCacheNoParamsBlock)(void);
-typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nullable id<NSCoding> object);
+typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nullable id<NSCoding> object, NSTimeInterval remainLife);
 
 @interface CZDiskCache : NSObject
 
@@ -30,32 +30,38 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 
 @property NSUInteger sizeLimit;
 
-//@property BOOL errorLogsSwitch;
-
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 - (nullable instancetype)initWithDirectory:(NSString *)directory;
-- (nullable instancetype)initWithDirectory:(NSString *)directory dbStoreThreshold:(NSUInteger)threshold NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithDirectory:(NSString *)directory
+                          dbStoreThreshold:(NSUInteger)threshold NS_DESIGNATED_INITIALIZER;
 
 
 - (nullable id<NSCoding>)objectForKey:(NSString *)key;
 - (nullable id<NSCoding>)objectForKey:(NSString *)key remainLife:(nullable NSTimeInterval *)remainLife;
-- (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion;
+
 - (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key;
 - (void)setObject:(nullable id<NSCoding>)object forKey:(NSString *)key lifetime:(NSTimeInterval)lifetime;
-- (void)setObject:(id<NSCoding>)object
-           forKey:(NSString *)key
-         lifetime:(NSTimeInterval)lifetime
-       completion:(nullable CZDiskCacheObjectBlock)completion;
 
 - (void)removeObjectForKey:(NSString *)key;
-- (void)removeObjectForKey:(NSString *)key completion:(nullable void (^)(NSString *key))completion;
 - (void)removeAllObjects;
-- (void)removeAllObjectsAsync:(nullable CZCacheNoParamsBlock)completion;
 
 - (NSInteger)totalCount;
 - (NSInteger)totalSize;
 
 @end
+
+@interface CZDiskCache (AsyncAccess)
+
+- (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion;
+- (void)setObject:(id<NSCoding>)object
+           forKey:(NSString *)key
+         lifetime:(NSTimeInterval)lifetime
+       completion:(nullable CZDiskCacheObjectBlock)completion;
+- (void)removeObjectForKey:(NSString *)key completion:(nullable void (^)(NSString *key))completion;
+- (void)removeAllObjectsAsync:(nullable CZCacheNoParamsBlock)completion;
+
+@end
+
 
 NS_ASSUME_NONNULL_END

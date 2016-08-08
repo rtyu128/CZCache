@@ -10,8 +10,8 @@
 #import "CZFileSupport.h"
 
 static NSString *const kStandardCacheName = @"StandardCache";
-static NSString *const kDocumentCacheFolderName = @"DocumentCache";
-static NSString *const kCachesCacheFolderName = @"CachesCache";
+static NSString *const kDocumentStorageFolderName = @"DocumentStorage";
+static NSString *const kCachesStorageFolderName = @"CachesStorage";
 
 @implementation CZCache
 
@@ -22,7 +22,7 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
     dispatch_once(&onceToken, ^{
         standardCache = [[CZCache alloc]
                          initWithName:kStandardCacheName
-                         directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName]];
+                         directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesStorageFolderName]];
         standardCache.memoryCache.countLimit = 40;
     });
     return standardCache;
@@ -32,14 +32,14 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
 {
     return [[CZCache alloc]
             initWithName:name
-            directory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:kDocumentCacheFolderName]];
+            directory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:kDocumentStorageFolderName]];
 }
 
 + (instancetype)cacheInCachesDirectoryWithName:(NSString *)name
 {
     return [[CZCache alloc]
             initWithName:name
-            directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName]];
+            directory:[[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesStorageFolderName]];
 }
 
 
@@ -47,7 +47,7 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
 {
     if (!name || 0 == name.length) return nil;
     NSString *fileDirectory = directory.length > 0 ? directory :
-                              [[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesCacheFolderName];
+                              [[CZFileSupport cachesDirectory] stringByAppendingPathComponent:kCachesStorageFolderName];
     if (self = [super init]) {
         _name = name;
         _storagePath = [fileDirectory stringByAppendingPathComponent:name];
@@ -75,10 +75,10 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
     [_diskCache setObject:object forKey:key];
 }
 
-- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key age:(NSTimeInterval)age
+- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key lifeTime:(NSTimeInterval)lifetime
 {
-    [_memoryCache setObject:object forKey:key lifeTime:age];
-    [_diskCache setObject:object forKey:key lifetime:age];
+    [_memoryCache setObject:object forKey:key lifeTime:lifetime];
+    [_diskCache setObject:object forKey:key lifetime:lifetime];
 }
 
 - (void)removeObjectForKey:(NSString *)key
@@ -108,13 +108,16 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
     [_diskCache removeAllObjects];
 }
 
-- (void)setObject:(id<NSCoding>)object forKey:(NSString *)key age:(NSTimeInterval)age completion:(CZCacheObjectBlock)completion
+- (void)setObject:(id<NSCoding>)object
+           forKey:(NSString *)key
+         lifeTime:(NSTimeInterval)lifetime
+       completion:(CZCacheObjectBlock)completion
 {
-    [_memoryCache setObject:object forKey:key lifeTime:age];
+    [_memoryCache setObject:object forKey:key lifeTime:lifetime];
     __weak typeof (&*self) weakSelf = self;
     [_diskCache
-     setObject:object forKey:key lifetime:age
-     completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object) {
+     setObject:object forKey:key lifetime:lifetime
+     completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object, NSTimeInterval remainLife) {
          __strong typeof (&*weakSelf) strongSelf = weakSelf;
          if (!strongSelf) return;
          if (completion) completion(strongSelf, key, object);
@@ -126,14 +129,17 @@ static NSString *const kCachesCacheFolderName = @"CachesCache";
     if (!completion) return;
     id<NSCoding> object = [_memoryCache objectForKey:key];
     if (object) {
-        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            completion(self, key, object);
+        });
     } else {
         __weak typeof (&*self) weakSelf = self;
         [_diskCache
          objectForKey:key
-         completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object) {
+         completion:^(CZDiskCache * _Nonnull cache, NSString * _Nonnull key, id<NSCoding>  _Nullable object, NSTimeInterval remainLife) {
              __strong typeof (&*weakSelf) strongSelf = weakSelf;
              if (!strongSelf) return;
+             if (object) [_memoryCache setObject:object forKey:key lifeTime:remainLife];
              completion(strongSelf, key, object);
          }];
     }
