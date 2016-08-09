@@ -42,8 +42,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)getItemValueForKey:(NSString *)key;
 - (nullable CZKVItem *)getItemForKey:(NSString *)key;
 
-- (int)totalItemsCount;
+- (BOOL)removeItemsWithSizeLimit:(NSInteger)size;
+- (BOOL)removeItemsWithCountLimit:(NSInteger)count;
+- (BOOL)removeItemsEarlierThanDate:(NSInteger)date;
+
 - (int)totalItemsSize;
+- (int)totalItemsCount;
 
 @end
 

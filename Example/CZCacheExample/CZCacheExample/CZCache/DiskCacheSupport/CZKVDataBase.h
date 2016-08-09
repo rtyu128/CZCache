@@ -53,11 +53,14 @@ NS_ASSUME_NONNULL_BEGIN
              extendedData:(nullable NSData *)extendedData;
 
 - (BOOL)dbDeleteItemWithKey:(NSString *)key;
+- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)time;
 
 - (nullable NSString *)dbGetFilenameWithKey:(NSString *)key;
+- (nullable NSArray<NSString *> *)dbGetFilenamesWithExpireDateEarlierThan:(NSInteger)date;
+- (nullable NSArray<CZKVItem *> *)dbGetItemsOrderByExpireDateAscWithLimit:(NSInteger)rowNum;
 
-- (int)dbGetTotalItemSize;
-- (int)dbGetTotalItemCount;
+- (NSInteger)dbGetTotalItemSize;
+- (NSInteger)dbGetTotalItemCount;
 
 @end
 

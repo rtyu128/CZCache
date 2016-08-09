@@ -157,7 +157,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (BOOL)dbInitialize
 {
-    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, expire_date integer default 0, extended_data blob, primary key(key));";
+    NSString *initSql = @"pragma journal_mode = wal; pragma synchronous = normal; create table if not exists KeyValues (key text NOT NULL, value_data blob, filename text, size integer, expire_date integer default 0, extended_data blob, primary key(key)); create index if not exists expire_date_index on KeyValues(expire_date);";
     return [self dbExecute:initSql];
 }
 
@@ -261,9 +261,25 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     return YES;
 }
 
+- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)time
+{
+    NSString *sqlStr = @"delete from KeyValues where expire_date < ?;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return NO;
+    sqlite3_bind_int64(stmt, 1, time);
+    
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database delete error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        return NO;
+    }
+    return YES;
+}
+
 - (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
-    NSString *sqlStr = @"select key, value_data, filename, size, expire_Date, extended_data from KeyValues where key = ?;";
+    NSString *sqlStr = @"select key, value_data, filename, size, expire_date, extended_data from KeyValues where key = ?;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
@@ -324,7 +340,64 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     return nil;
 }
 
-- (int)dbGetTotalItemSize
+- (NSArray<NSString *> *)dbGetFilenamesWithExpireDateEarlierThan:(NSInteger)date
+{
+    NSString *sqlStr = @"select filename from KeyValues where expire_date < ? and filename is not null;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return nil;
+    sqlite3_bind_int64(stmt, 1, date);
+    
+    int result = sqlite3_step(stmt);
+    NSMutableArray<NSString *> *filenames = [NSMutableArray array];
+    while (result == SQLITE_ROW) {
+        char *name = (char *)sqlite3_column_text(stmt, 0);
+        if (name && *name != 0) {
+            NSString *filename = [NSString stringWithUTF8String:name];
+            if (filename) [filenames addObject:filename];
+        }
+        result = sqlite3_step(stmt);
+    }
+    
+    if (result != SQLITE_DONE) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database query error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        filenames = nil;
+    }
+    
+    return filenames ? [filenames copy] : nil;
+}
+
+- (NSArray<CZKVItem *> *)dbGetItemsOrderByExpireDateAscWithLimit:(NSInteger)rowNum
+{
+    NSString *sqlStr = @"select key, filename, size from KeyValues order by expire_date asc limit ?;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return nil;
+    sqlite3_bind_int64(stmt, 1, rowNum);
+    
+    int result = sqlite3_step(stmt);
+    NSMutableArray *items = [NSMutableArray array];
+    while (result == SQLITE_ROW) {
+        char *key = (char *)sqlite3_column_text(stmt, 0);
+        char *filename = (char *)sqlite3_column_text(stmt, 1);
+        int size = sqlite3_column_int(stmt, 2);
+        CZKVItem *item = [CZKVItem new];
+        item.key = key ? [NSString stringWithUTF8String:key] : nil;
+        item.filename = filename ? [NSString stringWithUTF8String:filename] : nil;
+        item.size = size;
+        [items addObject:item];
+        result = sqlite3_step(stmt);
+    }
+    
+    if (result != SQLITE_DONE) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database query error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        items = nil;
+    }
+    
+    return items ? [items copy] : nil;
+}
+
+- (NSInteger)dbGetTotalItemSize
 {
     NSString *sqlStr = @"select sum(size) from KeyValues;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
@@ -340,7 +413,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     }
 }
 
-- (int)dbGetTotalItemCount
+- (NSInteger)dbGetTotalItemCount
 {
     NSString *sqlStr = @"select count(*) from KeyValues;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];

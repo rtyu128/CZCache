@@ -152,6 +152,85 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return [db dbDeleteItemWithKey:key];
 }
 
+- (BOOL)removeItemsWithSizeLimit:(NSInteger)size
+{
+    if (NSIntegerMax == size) return YES;
+    if (size <= 0) return [self removeAllItems];
+
+    NSInteger total = [db dbGetTotalItemSize];
+    if (total < 0) return NO;
+    if (total <= size) return YES;
+    
+    int rowNum = 20;
+    BOOL success = YES;
+    NSArray<CZKVItem *> *items = [db dbGetItemsOrderByExpireDateAscWithLimit:rowNum];
+    while (total > size && items.count > 0 && success) {
+        for (CZKVItem *item in items) {
+            if (total > size) {
+                if (item.filename) {
+                    [self cacheDeleteFile:item.filename];
+                }
+                success = [db dbDeleteItemWithKey:item.key];
+                total -= item.size;
+            } else {
+                break;
+            }
+            if (!success) break;
+        }
+        items = [db dbGetItemsOrderByExpireDateAscWithLimit:rowNum];
+    }
+    if (success) [db dbCheckpoint];
+    return success;
+}
+
+- (BOOL)removeItemsWithCountLimit:(NSInteger)count
+{
+    if (NSIntegerMax == count) return YES;
+    if (count <= 0) return [self removeAllItems];
+    
+    NSInteger total = [db dbGetTotalItemCount];
+    if (total < 0) return NO;
+    if (total <= count) return YES;
+    
+    int rowNum = 20;
+    BOOL success = YES;
+    NSArray<CZKVItem *> *items = [db dbGetItemsOrderByExpireDateAscWithLimit:rowNum];
+    while (total > count && items.count > 0 && success) {
+        for (CZKVItem *item in items) {
+            if (total > count) {
+                if (item.filename) {
+                    [self cacheDeleteFile:item.filename];
+                }
+                success = [db dbDeleteItemWithKey:item.key];
+                total --;
+            } else {
+                break;
+            }
+            if (!success) break;
+        }
+        items = [db dbGetItemsOrderByExpireDateAscWithLimit:rowNum];
+    }
+    if (success) [db dbCheckpoint];
+    return success;
+}
+
+- (BOOL)removeItemsEarlierThanDate:(NSInteger)date
+{
+    if (date <= 0) return YES;
+    if (NSIntegerMax == date) return [self removeAllItems];
+    
+    NSArray<NSString *> *filenames = [db dbGetFilenamesWithExpireDateEarlierThan:date];
+    for (NSString *name in filenames) {
+        [self cacheDeleteFile:name];
+    }
+    
+    if ([db dbDeleteItemsWithExpireDateEarlierThan:date]) {
+        [db dbCheckpoint];
+        return YES;
+    }
+    return NO;
+}
+
 - (BOOL)removeAllItems
 {
     if ([db dbReset]) {
@@ -192,14 +271,14 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return item;
 }
 
-- (int)totalItemsCount
-{
-    return [db dbGetTotalItemCount];
-}
-
 - (int)totalItemsSize
 {
     return [db dbGetTotalItemSize];
+}
+
+- (int)totalItemsCount
+{
+    return [db dbGetTotalItemCount];
 }
 
 @end

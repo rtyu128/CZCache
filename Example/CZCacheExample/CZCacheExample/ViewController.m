@@ -25,6 +25,8 @@
     
     NSLog(@"%@", [[CZCache standardCache] objectForKey:@"abc"]);
     
+    NSLog(@"%d, %lu", INT_MAX, NSUIntegerMax);
+    
 }
 
 - (void)didReceiveMemoryWarning {
