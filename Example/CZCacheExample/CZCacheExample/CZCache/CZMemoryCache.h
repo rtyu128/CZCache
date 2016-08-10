@@ -27,7 +27,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 @property (nullable, copy) NSString *name;
 
 // The total count of key-value pairs in memory cache.
-@property (readonly) NSInteger totalCount;
+@property (readonly) NSUInteger totalCount;
 
 /**
  The maximum count of key-valus pairs allowed in memory cache.

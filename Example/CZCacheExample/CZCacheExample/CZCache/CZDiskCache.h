@@ -26,9 +26,9 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 @property (nullable, copy) id (^customUnarchiveBlock)(NSData *data);
 
 
-@property NSUInteger countLimit;
+@property NSInteger countLimit;
 
-@property NSUInteger sizeLimit;
+@property NSInteger sizeLimit;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -46,8 +46,11 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 - (void)removeObjectForKey:(NSString *)key;
 - (void)removeAllObjects;
 
-- (NSInteger)totalCount;
 - (NSInteger)totalSize;
+- (NSInteger)totalCount;
+
+- (void)trimToSizeLimit:(NSInteger)size;
+- (void)trimToCountLimit:(NSInteger)count;
 
 @end
 

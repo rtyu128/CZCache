@@ -28,7 +28,7 @@
 
 @interface CacheDoublyLinkedList : NSObject {
     @package
-    NSInteger totalCount;
+    NSUInteger totalCount;
     CacheKVNode *head;
     CacheKVNode *tail;
 }
@@ -174,10 +174,7 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter]
-     removeObserver:self name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-    [[NSNotificationCenter defaultCenter]
-     removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [list removeAllNode];
     CFRelease(dict);
     pthread_mutex_destroy(&mutexLock);
@@ -427,7 +424,7 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
 
 #pragma mark - Setter & Getter
 
-- (NSInteger)totalCount
+- (NSUInteger)totalCount
 {
     pthread_mutex_lock(&mutexLock);
     NSInteger result = list->totalCount;

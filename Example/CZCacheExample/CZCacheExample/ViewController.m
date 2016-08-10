@@ -24,8 +24,11 @@
     self.view.backgroundColor = [UIColor greenColor];
     
     NSLog(@"%@", [[CZCache standardCache] objectForKey:@"abc"]);
+    //NSLog(@"%@", [[CZCache standardCache] objectForKey:@"bigData"]);
+    NSLog(@"%@", [CZCache standardCache][@"number"]);
+    NSLog(@"%@", [[CZCache standardCache] objectForKey:@"hosts"]);
     
-    NSLog(@"%d, %lu", INT_MAX, NSUIntegerMax);
+    NSLog(@"%d, %lu, %lu", INT_MAX, NSUIntegerMax, NSIntegerMax);
     
 }
 

@@ -271,12 +271,12 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     return item;
 }
 
-- (int)totalItemsSize
+- (NSInteger)totalItemsSize
 {
     return [db dbGetTotalItemSize];
 }
 
-- (int)totalItemsCount
+- (NSInteger)totalItemsCount
 {
     return [db dbGetTotalItemCount];
 }

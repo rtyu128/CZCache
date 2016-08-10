@@ -36,6 +36,12 @@
     }
     [[CZCache standardCache] setObject:dataValue forKey:@"bigData"];
 
+    NSDictionary *hosts = @{@"nickName" : @"Asshole", @"Company" : @"ABCD", @"age" : @88};
+    [[CZCache standardCache] setObject:hosts forKey:@"hosts"];
+    
+    [CZCache standardCache][@"number"] = @520;
+    
+    NSLog(@"%@", [CZFileSupport documentDirectory]);
     
     
     ViewController *rootVC = [[ViewController alloc] init];
@@ -66,8 +72,8 @@
      numbe = cache.totalCount;
      */
     
-    CFTimeInterval time = CACurrentMediaTime();
-    NSLog(@"%f", time);
+//    CFTimeInterval time = CACurrentMediaTime();
+//    NSLog(@"%f", time);
     
     /**
      /// CZFileSupport Test
@@ -80,7 +86,7 @@
     
     
     /// CZKVDataBase Test
-    NSLog(@"%@", [CZFileSupport documentDirectory]);
+    
     //_dataBase = [[CZKVDataBase alloc] initWithDirectory:[CZFileSupport documentDirectory]];
     
     
@@ -111,20 +117,20 @@
     }];
     */
     
-    NSDictionary *hosts = @{@"nickName" : @"Asshole", @"Company" : @"ABCD", @"age" : @88};
-    _diskCache = [[CZDiskCache alloc] initWithDirectory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:@"userInfo"]
-                                       dbStoreThreshold:500];
+//    NSDictionary *hosts = @{@"nickName" : @"Asshole", @"Company" : @"ABCD", @"age" : @88};
+    //_diskCache = [[CZDiskCache alloc] initWithDirectory:[[CZFileSupport documentDirectory] stringByAppendingPathComponent:@"userInfo"]
+                                       //dbStoreThreshold:500];
 //    [_diskCache setObject:@"Asshole" forKey:@"nickName"];
 //    [_diskCache setObject:@"ABCD" forKey:@"Company"];
-    [_diskCache setObject:hosts forKey:@"Hosts"];
+    //[_diskCache setObject:hosts forKey:@"Hosts"];
     
 //    NSLog(@"%@", [_diskCache objectForKey:@"nickName"]);
 //    NSLog(@"%@", [_diskCache objectForKey:@"Company"]);
-    NSLog(@"%@", [_diskCache objectForKey:@"Hosts"]);
+    //NSLog(@"%@", [_diskCache objectForKey:@"Hosts"]);
     
 //    [_diskCache removeObjectForKey:@"nickName"];
 //    [_diskCache removeObjectForKey:@"Company"];
-    [_diskCache removeObjectForKey:@"Hosts"];
+    //[_diskCache removeObjectForKey:@"Hosts"];
     
     //NSLog(@"%@", MD5String(@"DocumentCache"));
     //NSLog(@"%@", MD5String(@"CachesCache"));

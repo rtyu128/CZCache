@@ -46,8 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)removeItemsWithCountLimit:(NSInteger)count;
 - (BOOL)removeItemsEarlierThanDate:(NSInteger)date;
 
-- (int)totalItemsSize;
-- (int)totalItemsCount;
+- (NSInteger)totalItemsSize;
+- (NSInteger)totalItemsCount;
 
 @end
 

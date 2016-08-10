@@ -261,12 +261,12 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     return YES;
 }
 
-- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)time
+- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)date
 {
-    NSString *sqlStr = @"delete from KeyValues where expire_date < ?;";
+    NSString *sqlStr = @"delete from KeyValues where expire_date < ? and expire_date > 0;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return NO;
-    sqlite3_bind_int64(stmt, 1, time);
+    sqlite3_bind_int64(stmt, 1, date);
     
     int result = sqlite3_step(stmt);
     if (result != SQLITE_DONE) {
@@ -342,7 +342,7 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
 
 - (NSArray<NSString *> *)dbGetFilenamesWithExpireDateEarlierThan:(NSInteger)date
 {
-    NSString *sqlStr = @"select filename from KeyValues where expire_date < ? and filename is not null;";
+    NSString *sqlStr = @"select filename from KeyValues where expire_date < ? and expire_date > 0 and filename is not null;";
     sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
     if (!stmt) return nil;
     sqlite3_bind_int64(stmt, 1, date);

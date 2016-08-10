@@ -89,15 +89,19 @@ static void setReusableCache(CZDiskCache *cache)
         if (!kvStore) return nil;
         
         _path = directory;
-        _sizeLimit = NSUIntegerMax;
-        _countLimit = NSUIntegerMax;
+        _sizeLimit = NSIntegerMax;
+        _countLimit = NSIntegerMax;
         _dbStoreThreshold = threshold;
         lockSignal = dispatch_semaphore_create(1);
-        accessQueue = dispatch_queue_create("com.netease.memory", DISPATCH_QUEUE_CONCURRENT);
+        accessQueue = dispatch_queue_create("com.netease.disk", DISPATCH_QUEUE_CONCURRENT);
         setReusableCache(self);
         
         [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(appWillTerminate:)
+                                                 selector:@selector(cz_backgroundCleanDisk:)
+                                                     name:UIApplicationDidEnterBackgroundNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(cz_appWillTerminate:)
                                                      name:UIApplicationWillTerminateNotification
                                                    object:nil];
     }
@@ -106,15 +110,7 @@ static void setReusableCache(CZDiskCache *cache)
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter]
-     removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
-}
-
-- (void)appWillTerminate:(NSNotification *)notification
-{
-    [self lock];
-    kvStore = nil;
-    [self unlock];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)lock
@@ -258,12 +254,80 @@ static void setReusableCache(CZDiskCache *cache)
 }
 
 
+#pragma mark - Trim & Clean
+
+- (void)trimToSizeLimit:(NSInteger)size
+{
+    [self lock];
+    if (size <= NSIntegerMax && size >= 0) {
+        [kvStore removeItemsWithSizeLimit:size];
+    }
+    [self unlock];
+}
+
+- (void)trimToCountLimit:(NSInteger)count
+{
+    [self lock];
+    if (count <= NSIntegerMax && count >= 0) {
+        [kvStore removeItemsWithCountLimit:count];
+    }
+    [self unlock];
+}
+
+- (void)cleanExpireKeyValues
+{
+    [self lock];
+    [kvStore removeItemsEarlierThanDate:time(NULL)];
+    [self unlock];
+}
+
+- (void)cz_appWillTerminate:(NSNotification *)notification
+{
+    [self cz_cleanDiskWithCompletion:^{
+        [self lock];
+        kvStore = nil;
+        [self unlock];
+    }];
+}
+
+- (void)cz_backgroundCleanDisk:(NSNotification *)notification
+{
+    Class UIApplicationClass = NSClassFromString(@"UIApplication");
+    if (!UIApplicationClass || ![UIApplicationClass respondsToSelector:@selector(sharedApplication)]) {
+        return;
+    }
+    
+    UIApplication *application = [UIApplication sharedApplication];
+    __block UIBackgroundTaskIdentifier taskId = [application beginBackgroundTaskWithExpirationHandler:^{
+        [application endBackgroundTask:taskId];
+        taskId = UIBackgroundTaskInvalid;
+    }];
+    
+    [self cz_cleanDiskWithCompletion:^{
+        [application endBackgroundTask:taskId];
+        taskId = UIBackgroundTaskInvalid;
+    }];
+}
+
+- (void)cz_cleanDiskWithCompletion:(CZCacheNoParamsBlock)completion
+{
+    dispatch_async(accessQueue, ^{
+        [self cleanExpireKeyValues];
+        [self trimToSizeLimit:self.sizeLimit];
+        [self trimToCountLimit:self.countLimit];
+    
+        if (completion) {
+            completion();
+        }
+    });
+}
+
 #pragma mark - Getter
 
 - (NSInteger)totalCount
 {
     [self lock];
-    int count = [kvStore totalItemsCount];
+    NSInteger count = [kvStore totalItemsCount];
     [self unlock];
     return count;
 }
@@ -271,7 +335,7 @@ static void setReusableCache(CZDiskCache *cache)
 - (NSInteger)totalSize
 {
     [self lock];
-    int size = [kvStore totalItemsSize];
+    NSInteger size = [kvStore totalItemsSize];
     [self unlock];
     return size;
 }
