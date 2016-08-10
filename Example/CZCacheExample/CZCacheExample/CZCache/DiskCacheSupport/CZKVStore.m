@@ -90,7 +90,7 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     if (result)
         result = [[NSFileManager defaultManager] createDirectoryAtPath:valueFileDirectory
                                            withIntermediateDirectories:YES attributes:nil error:nil];
-    CFRelease(uuid);// 这个应该不用释放
+    CFRelease(uuid); // 这个应该不用释放
     return result;
 }
 
@@ -140,6 +140,35 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
     } else {
         return [db dbSaveItemWithKey:key value:value filename:filename lifetime:lifetime extendedData:extendedData];
     }
+}
+
+- (NSData *)getItemValueForKey:(NSString *)key
+{
+    return [self getItemForKey:key].value;
+}
+
+- (CZKVItem *)getItemForKey:(NSString *)key
+{
+    if (0 == key.length) return nil;
+    CZKVItem *item = [db dbGetItemForKey:key];
+    if (item) {
+        if (![item isValid]) {
+            if (item.filename.length > 0) {
+                [self cacheDeleteFile:item.filename];
+            }
+            [db dbDeleteItemWithKey:key];
+            item = nil;
+        }
+        
+        if (item.filename.length > 0) {
+            item.value = [self cacheDataFromFile:item.filename];
+            if (!item.value) {
+                [db dbDeleteItemWithKey:key];
+                item = nil;
+            }
+        }
+    }
+    return item;
 }
 
 - (BOOL)removeItemForKey:(NSString *)key
@@ -240,35 +269,6 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
         }
     }
     return NO;
-}
-
-- (NSData *)getItemValueForKey:(NSString *)key
-{
-    return [self getItemForKey:key].value;
-}
-
-- (CZKVItem *)getItemForKey:(NSString *)key
-{
-    if (0 == key.length) return nil;
-    CZKVItem *item = [db dbGetItemForKey:key];
-    if (item) {
-        if (![item isValid]) {
-            if (item.filename.length > 0) {
-                [self cacheDeleteFile:item.filename];
-            }
-            [db dbDeleteItemWithKey:key];
-            item = nil;
-        }
-        
-        if (item.filename.length > 0) {
-            item.value = [self cacheDataFromFile:item.filename];
-            if (!item.value) {
-                [db dbDeleteItemWithKey:key];
-                item = nil;
-            }
-        }
-    }
-    return item;
 }
 
 - (NSInteger)totalItemsSize

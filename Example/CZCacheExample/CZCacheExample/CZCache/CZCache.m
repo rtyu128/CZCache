@@ -15,6 +15,9 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
 
 @implementation CZCache
 
+
+#pragma mark - Life Cycle
+
 + (instancetype)standardCache
 {
     static CZCache *standardCache;
@@ -57,6 +60,10 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     }
     return self;
 }
+
+
+#pragma mark - Public
+#pragma mark - Access Methods
 
 - (id<NSCoding>)objectForKey:(NSString *)key
 {
@@ -121,6 +128,12 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     [_diskCache removeObjectForKey:key];
 }
 
+- (void)removeAllObjects
+{
+    [_memoryCache removeAllObjects];
+    [_diskCache removeAllObjects];
+}
+
 
 #pragma mark - Keyed Subscript Index
 
@@ -136,12 +149,6 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
 
 
 #pragma mark - Async Access Methods
-
-- (void)removeAllObjects
-{
-    [_memoryCache removeAllObjects];
-    [_diskCache removeAllObjects];
-}
 
 - (void)setObject:(id<NSCoding>)object
            forKey:(NSString *)key
@@ -191,6 +198,9 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     [_memoryCache removeAllObjects];
     [_diskCache removeAllObjectsAsync:completion];
 }
+
+
+#pragma mark - Description
 
 - (NSString *)description
 {

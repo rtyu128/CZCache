@@ -245,38 +245,6 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     return YES;
 }
 
-- (BOOL)dbDeleteItemWithKey:(NSString *)key
-{
-    NSString *sqlStr = @"delete from KeyValues where key = ?;";
-    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
-    if (!stmt) return NO;
-    sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
-    
-    int result = sqlite3_step(stmt);
-    if (result != SQLITE_DONE) {
-        if (_errorLogsSwitch)
-            NSLog(@"%s line %d: database delete error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
-        return NO;
-    }
-    return YES;
-}
-
-- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)date
-{
-    NSString *sqlStr = @"delete from KeyValues where expire_date < ? and expire_date > 0;";
-    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
-    if (!stmt) return NO;
-    sqlite3_bind_int64(stmt, 1, date);
-    
-    int result = sqlite3_step(stmt);
-    if (result != SQLITE_DONE) {
-        if (_errorLogsSwitch)
-            NSLog(@"%s line %d: database delete error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
-        return NO;
-    }
-    return YES;
-}
-
 - (CZKVItem *)dbGetItemForKey:(NSString *)key
 {
     NSString *sqlStr = @"select key, value_data, filename, size, expire_date, extended_data from KeyValues where key = ?;";
@@ -395,6 +363,38 @@ static NSString *const kDataBaseWalFileName = @"KeyValueDataBase.sqlite-wal";
     }
     
     return items ? [items copy] : nil;
+}
+
+- (BOOL)dbDeleteItemWithKey:(NSString *)key
+{
+    NSString *sqlStr = @"delete from KeyValues where key = ?;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return NO;
+    sqlite3_bind_text(stmt, 1, key.UTF8String, -1, NULL);
+    
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database delete error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)date
+{
+    NSString *sqlStr = @"delete from KeyValues where expire_date < ? and expire_date > 0;";
+    sqlite3_stmt *stmt = [self dbPrepareStmt:sqlStr];
+    if (!stmt) return NO;
+    sqlite3_bind_int64(stmt, 1, date);
+    
+    int result = sqlite3_step(stmt);
+    if (result != SQLITE_DONE) {
+        if (_errorLogsSwitch)
+            NSLog(@"%s line %d: database delete error (%d): %s", __func__, __LINE__, result, sqlite3_errmsg(dataBase));
+        return NO;
+    }
+    return YES;
 }
 
 - (NSInteger)dbGetTotalItemSize

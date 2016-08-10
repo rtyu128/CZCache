@@ -52,12 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
                  lifetime:(NSTimeInterval)lifetime
              extendedData:(nullable NSData *)extendedData;
 
-- (BOOL)dbDeleteItemWithKey:(NSString *)key;
-- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)time;
-
 - (nullable NSString *)dbGetFilenameWithKey:(NSString *)key;
 - (nullable NSArray<NSString *> *)dbGetFilenamesWithExpireDateEarlierThan:(NSInteger)date;
 - (nullable NSArray<CZKVItem *> *)dbGetItemsOrderByExpireDateAscWithLimit:(NSInteger)rowNum;
+
+- (BOOL)dbDeleteItemWithKey:(NSString *)key;
+- (BOOL)dbDeleteItemsWithExpireDateEarlierThan:(NSInteger)time;
 
 - (NSInteger)dbGetTotalItemSize;
 - (NSInteger)dbGetTotalItemCount;

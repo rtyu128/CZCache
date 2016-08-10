@@ -181,31 +181,8 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
 }
 
 
-#pragma mark - Notification Handler
-
-- (void)didReceiveMemoryWarningNotification:(NSNotification *)notification
-{
-    if (self.didReceiveMemoryWarningBlock) {
-        self.didReceiveMemoryWarningBlock(self);
-    }
-    if (_shouldRemoveAllObjectsWhenMemoryWarning) {
-        [self removeAllObjects];
-    }
-}
-
-- (void)didEnterBackgroundNotification:(NSNotification *)notification
-{
-    if (self.didEnterBackgroundBlock) {
-        self.didEnterBackgroundBlock(self);
-    }
-    if (_shouldRemoveAllObjectsWhenEnteringBackground) {
-        [self removeAllObjects];
-    }
-}
-
-
 #pragma mark - Public
-#pragma mark - Operation Interface
+#pragma mark - Access Methods
 
 - (void)setObject:(nullable id)object forKey:(id)key
 {
@@ -340,7 +317,30 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
 }
 
 
-#pragma mark - Memory Trim
+#pragma mark Notification Handler
+
+- (void)didReceiveMemoryWarningNotification:(NSNotification *)notification
+{
+    if (self.didReceiveMemoryWarningBlock) {
+        self.didReceiveMemoryWarningBlock(self);
+    }
+    if (_shouldRemoveAllObjectsWhenMemoryWarning) {
+        [self removeAllObjects];
+    }
+}
+
+- (void)didEnterBackgroundNotification:(NSNotification *)notification
+{
+    if (self.didEnterBackgroundBlock) {
+        self.didEnterBackgroundBlock(self);
+    }
+    if (_shouldRemoveAllObjectsWhenEnteringBackground) {
+        [self removeAllObjects];
+    }
+}
+
+
+#pragma mark Memory Trim
 
 - (void)autoTrim
 {
@@ -422,7 +422,7 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
     }
 }
 
-#pragma mark - Setter & Getter
+#pragma mark Setter & Getter
 
 - (NSUInteger)totalCount
 {

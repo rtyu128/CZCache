@@ -46,11 +46,11 @@ NS_ASSUME_NONNULL_BEGIN
          lifeTime:(NSTimeInterval)lifetime
      extendedData:(NSData *)extendedData;
 
-- (nullable id<NSCoding>)objectForKeyedSubscript:(NSString *)key;
-- (void)setObject:(nullable id<NSCoding>)object forKeyedSubscript:(NSString *)key;
-
 - (void)removeObjectForKey:(NSString *)key;
 - (void)removeAllObjects;
+
+- (nullable id<NSCoding>)objectForKeyedSubscript:(NSString *)key;
+- (void)setObject:(nullable id<NSCoding>)object forKeyedSubscript:(NSString *)key;
 
 @end
 

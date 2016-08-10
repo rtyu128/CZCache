@@ -26,6 +26,9 @@ static NSString *MD5String (NSString *string) {
             result[12], result[13], result[14], result[15]];
 }
 
+
+#pragma mark - DiskCachesPool
+
 static NSMapTable<NSString *, CZDiskCache *> *globalDiskCaches;
 static dispatch_semaphore_t globalDiskCachesLock;
 
@@ -36,7 +39,7 @@ static void CZDiskCachesPoolInit()
         globalDiskCachesLock = dispatch_semaphore_create(1);
         globalDiskCaches = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory
                                                      valueOptions:NSPointerFunctionsWeakMemory
-                                                         capacity:1];
+                                                         capacity:2];
     });
 }
 
@@ -60,11 +63,16 @@ static void setReusableCache(CZDiskCache *cache)
 }
 
 
+#pragma mark - CZDiskCache Implementation
+
 @implementation CZDiskCache {
     CZKVStore *kvStore;
     dispatch_queue_t accessQueue;
     dispatch_semaphore_t lockSignal;
 }
+
+
+#pragma mark - Life Cycle
 
 - (instancetype)initWithDirectory:(NSString *)directory
 {
@@ -111,16 +119,6 @@ static void setReusableCache(CZDiskCache *cache)
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)lock
-{
-    dispatch_semaphore_wait(lockSignal, DISPATCH_TIME_FOREVER);
-}
-
-- (void)unlock
-{
-    dispatch_semaphore_signal(lockSignal);
 }
 
 
@@ -202,7 +200,7 @@ static void setReusableCache(CZDiskCache *cache)
 }
 
 
-#pragma mark - Async Access Methods
+#pragma mark Async Access Methods
 
 - (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion
 {
@@ -254,7 +252,24 @@ static void setReusableCache(CZDiskCache *cache)
 }
 
 
-#pragma mark - Trim & Clean
+#pragma mark CZExtendedData
+
+static void *kExtendedDataKey = "kExtendedDataKey";
+
++ (NSData *)extendedDataForObject:(id)anObject
+{
+    if (!anObject) return nil;
+    return (NSData *)objc_getAssociatedObject(anObject, kExtendedDataKey);
+}
+
++ (void)setExtendedData:(NSData *)extendedData forObject:(id)anObject
+{
+    if (!anObject) return;
+    objc_setAssociatedObject(anObject, kExtendedDataKey, extendedData, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+
+#pragma mark Trim
 
 - (void)trimToSizeLimit:(NSInteger)size
 {
@@ -274,12 +289,32 @@ static void setReusableCache(CZDiskCache *cache)
     [self unlock];
 }
 
+
+#pragma mark - Private
+#pragma mark - Clean
+
 - (void)cleanExpireKeyValues
 {
     [self lock];
     [kvStore removeItemsEarlierThanDate:time(NULL)];
     [self unlock];
 }
+
+- (void)cz_cleanDiskWithCompletion:(CZCacheNoParamsBlock)completion
+{
+    dispatch_async(accessQueue, ^{
+        [self cleanExpireKeyValues];
+        [self trimToSizeLimit:self.sizeLimit];
+        [self trimToCountLimit:self.countLimit];
+        
+        if (completion) {
+            completion();
+        }
+    });
+}
+
+
+#pragma mark Notification Handler
 
 - (void)cz_appWillTerminate:(NSNotification *)notification
 {
@@ -309,20 +344,21 @@ static void setReusableCache(CZDiskCache *cache)
     }];
 }
 
-- (void)cz_cleanDiskWithCompletion:(CZCacheNoParamsBlock)completion
+
+#pragma mark Lock & Unlock
+
+- (void)lock
 {
-    dispatch_async(accessQueue, ^{
-        [self cleanExpireKeyValues];
-        [self trimToSizeLimit:self.sizeLimit];
-        [self trimToCountLimit:self.countLimit];
-    
-        if (completion) {
-            completion();
-        }
-    });
+    dispatch_semaphore_wait(lockSignal, DISPATCH_TIME_FOREVER);
 }
 
-#pragma mark - Getter
+- (void)unlock
+{
+    dispatch_semaphore_signal(lockSignal);
+}
+
+
+#pragma mark Getter
 
 - (NSInteger)totalCount
 {
@@ -343,23 +379,6 @@ static void setReusableCache(CZDiskCache *cache)
 - (NSString *)filenameForKey:(NSString *)key
 {
     return MD5String(key);
-}
-
-
-#pragma mark - CZExtendedData
-
-static void *kExtendedDataKey = "kExtendedDataKey";
-
-+ (NSData *)extendedDataForObject:(id)anObject
-{
-    if (!anObject) return nil;
-    return (NSData *)objc_getAssociatedObject(anObject, kExtendedDataKey);
-}
-
-+ (void)setExtendedData:(NSData *)extendedData forObject:(id)anObject
-{
-    if (!anObject) return;
-    objc_setAssociatedObject(anObject, kExtendedDataKey, extendedData, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)description

@@ -36,15 +36,14 @@ NS_ASSUME_NONNULL_BEGIN
                lifetime:(NSTimeInterval)lifetime
            extendedData:(nullable NSData *)extendedData;
 
-- (BOOL)removeItemForKey:(NSString *)key;
-- (BOOL)removeAllItems;
-
 - (nullable NSData *)getItemValueForKey:(NSString *)key;
 - (nullable CZKVItem *)getItemForKey:(NSString *)key;
 
+- (BOOL)removeItemForKey:(NSString *)key;
 - (BOOL)removeItemsWithSizeLimit:(NSInteger)size;
 - (BOOL)removeItemsWithCountLimit:(NSInteger)count;
 - (BOOL)removeItemsEarlierThanDate:(NSInteger)date;
+- (BOOL)removeAllItems;
 
 - (NSInteger)totalItemsSize;
 - (NSInteger)totalItemsCount;
