@@ -152,6 +152,11 @@ static void setReusableCache(CZDiskCache *cache)
     return object;
 }
 
+- (BOOL)containsObjectForKey:(NSString *)key
+{
+    return [self objectForKey:key remainLife:NULL] ? YES : NO;
+}
+
 - (void)setObject:(id<NSCoding>)object forKey:(NSString *)key
 {
     [self setObject:object forKey:key lifetime:CZ_LIVE_FOREVER];
@@ -212,6 +217,18 @@ static void setReusableCache(CZDiskCache *cache)
         NSTimeInterval remainLife = 0.0;
         id<NSCoding> object = [self objectForKey:key remainLife:&remainLife];
         completion(strongSelf, key, object, remainLife);
+    });
+}
+
+- (void)containsObjectForKey:(NSString *)key completion:(void(^)(NSString *key, BOOL contains))completion
+{
+    if (!completion) return;
+    __weak typeof (&*self) weakSelf = self;
+    dispatch_async(accessQueue, ^{
+        __strong typeof (&*weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        BOOL result = [self containsObjectForKey:key];
+        completion(key, result);
     });
 }
 

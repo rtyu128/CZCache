@@ -113,6 +113,15 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
 - (nullable id<NSCoding>)objectForKey:(NSString *)key remainLife:(nullable NSTimeInterval *)remainLife;
 
 /**
+ Returns a boolean value indicates whether a given key's associated value is in cache.
+ This method may blocks the calling thread until the result is get.
+ 
+ @param key: The key which you want to check, if nil return NO.
+ @return: whether the key's associated value is in cache.
+ */
+- (BOOL)containsObjectForKey:(NSString *)key;
+
+/**
  Sets the value of the specified key in the disk cache with live forever (`CZ_LIVE_FOREVER`).
  This method may blocks the calling thread until file write finished.
  
@@ -193,6 +202,16 @@ typedef void (^CZDiskCacheObjectBlock)(CZDiskCache *cache, NSString *key, _Nulla
  @param completion: A block used to get key-value pair after operation finished.
  */
 - (void)objectForKey:(NSString *)key completion:(CZDiskCacheObjectBlock)completion;
+
+/**
+ Returns a boolean value with the block that indicates whether a given key is in cache.
+ This method returns immediately and invoke the passed block in background queue
+ when the operation finished.
+ 
+ @param key: The key which you want to check, if nil return NO.
+ @param completion: A block which will be invoked in background queue after operation finished.
+ */
+- (void)containsObjectForKey:(NSString *)key completion:(void(^)(NSString *key, BOOL contains))completion;
 
 /**
  Sets the value of the specified key in the disk cache, and associates the key-value pair with the

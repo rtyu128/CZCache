@@ -105,6 +105,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable NSData *)extendedDataForKeyValue:(NSString *)aKey;
 
 /**
+ Returns a boolean value indicates whether a given key's associated value is in cache.
+ This method may blocks the calling thread until the result is get.
+ 
+ @param aKey: The key which you want to check, if nil return NO.
+ @return: whether the key's associated value is in cache.
+ */
+- (BOOL)containsObjectForKey:(NSString *)aKey;
+
+/**
  Sets the value of the specified key in the cache with live forever (`CZ_LIVE_FOREVER`).
  This method may blocks the calling thread until file write finished.
  
@@ -194,6 +203,16 @@ typedef void (^CZCacheObjectBlock)(CZCache *cache, NSString *key, _Nullable id<N
  @param completion: A block used to get key-value pair after operation finished.
  */
 - (void)objectForKey:(NSString *)aKey completion:(CZCacheObjectBlock)completion;
+
+/**
+ Returns a boolean value with the block that indicates whether a given key is in cache.
+ This method returns immediately and invoke the passed block in background queue
+ when the operation finished.
+ 
+ @param aKey: The key which you want to check, if nil return NO.
+ @param completion: A block which will be invoked in background queue after operation finished.
+ */
+- (void)containsObjectForKey:(NSString *)aKey completion:(void(^)(NSString *key, BOOL contains))completion;
 
 /**
  Sets the value of the specified key in the cache, and associates the key-value pair with the

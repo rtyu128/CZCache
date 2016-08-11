@@ -90,6 +90,11 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
     return [CZDiskCache extendedDataForObject:[self objectForKey:aKey]];
 }
 
+- (BOOL)containsObjectForKey:(NSString *)aKey
+{
+    return [_memoryCache containsObjectForKey:aKey] || [_diskCache containsObjectForKey:aKey];
+}
+
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString *)aKey
 {
     [_memoryCache setObject:anObject forKey:aKey];
@@ -183,6 +188,19 @@ static NSString *const kCachesStorageFolderName = @"CachesStorage";
              if (object) [_memoryCache setObject:object forKey:aKey lifeTime:remainLife];
              completion(strongSelf, aKey, object);
          }];
+    }
+}
+
+- (void)containsObjectForKey:(NSString *)aKey completion:(void(^)(NSString *key, BOOL contains))completion
+{
+    if (!completion) return;
+    
+    if ([_memoryCache containsObjectForKey:aKey]) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            completion(aKey, YES);
+        });
+    } else {
+        [_diskCache containsObjectForKey:aKey completion:completion];
     }
 }
 
