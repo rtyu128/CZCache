@@ -1,7 +1,7 @@
 //
 //  CZDiskCache.m
 //  CZCache
-//
+//  https://github.com/rtyu128/CZCache
 //  Created by Anchor on 16/6/15.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
@@ -274,7 +274,7 @@ static void *kExtendedDataKey = "kExtendedDataKey";
 - (void)trimToSizeLimit:(NSInteger)size
 {
     [self lock];
-    if (size <= NSIntegerMax && size >= 0) {
+    if (size < NSIntegerMax && size >= 0) {
         [kvStore removeItemsWithSizeLimit:size];
     }
     [self unlock];
@@ -283,7 +283,7 @@ static void *kExtendedDataKey = "kExtendedDataKey";
 - (void)trimToCountLimit:(NSInteger)count
 {
     [self lock];
-    if (count <= NSIntegerMax && count >= 0) {
+    if (count < NSIntegerMax && count >= 0) {
         [kvStore removeItemsWithCountLimit:count];
     }
     [self unlock];
@@ -303,10 +303,22 @@ static void *kExtendedDataKey = "kExtendedDataKey";
 - (void)cz_cleanDiskWithCompletion:(CZCacheNoParamsBlock)completion
 {
     dispatch_async(accessQueue, ^{
+        [self lock];
+        [kvStore removeItemsEarlierThanDate:time(NULL)];
+        
+        if (_sizeLimit < NSIntegerMax && _sizeLimit >= 0) {
+            [kvStore removeItemsWithSizeLimit:_sizeLimit];
+        }
+        
+        if (_countLimit < NSIntegerMax && _countLimit >= 0) {
+            [kvStore removeItemsWithCountLimit:_countLimit];
+        }
+        [self unlock];
+        /*
         [self cleanExpireKeyValues];
         [self trimToSizeLimit:self.sizeLimit];
         [self trimToCountLimit:self.countLimit];
-        
+        */
         if (completion) {
             completion();
         }

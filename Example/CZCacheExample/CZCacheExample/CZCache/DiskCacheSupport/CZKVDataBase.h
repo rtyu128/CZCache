@@ -1,7 +1,7 @@
 //
 //  CZKVDataBase.h
 //  CZCache
-//
+//  https://github.com/rtyu128/CZCache
 //  Created by Anchor on 16/6/13.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
@@ -15,7 +15,10 @@ NS_ASSUME_NONNULL_BEGIN
  CZKVDataBase is only a single SQLite database. Used for storing CZKVItem.
  If you need to handle complex task with database, maybe FMDB or CoreData is the best choice.
  
- Thanks for sqlite3's authors and their great works.
+ Thanks for sqlite3's authors and their great works, here is a blessing:
+    May you do good and not evil.
+    May you find forgiveness for yourself and forgive others.
+    May you share freely, never taking more than you give.
  */
 @interface CZKVDataBase : NSObject
 

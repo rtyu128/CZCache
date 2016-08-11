@@ -1,7 +1,7 @@
 //
 //  CZMemoryCache.h
 //  CZCache
-//
+//  https://github.com/rtyu128/CZCache
 //  Created by Anchor on 16/5/20.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
@@ -14,16 +14,17 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 
 /**
- CZMemoryCache is a fast memory cache used to store key-value pairs.
- Like YYMemoryCache, CZMemoryCache use LRU(Least Recently Used) to manage key-value pairs,
+ `CZMemoryCache` is a fast memory cache used to store key-value pairs.
+ Like `YYMemoryCache`, `CZMemoryCache` use LRU (Least Recently Used) to manage key-value pairs,
  support automatically clean key-value pairs or custom operation when receive memory warning
- or App enter background. Also, CZMemoryCache can be managed by count and lifetime.
+ or App enter background. Also, `CZMemoryCache` can be managed by count and lifetime, and is 
+ thread safe.
  
- Differently, You can set lifetime(age) of each key-value pair in CZMemoryCache.
+ Differently, You can set lifetime (age) of each key-value pair in `CZMemoryCache`.
  */
 @interface CZMemoryCache <KeyType, ObjectType> : NSObject
 
-// The name of memory cache. Default is nil.
+// The name of the memory cache. The empty string (nil) if no name is specified.
 @property (nullable, copy) NSString *name;
 
 // The total count of key-value pairs in memory cache.
@@ -38,7 +39,7 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 @property (assign) NSUInteger countLimit;
 
 /**
- The cycle that control auto trim interval(in secends), default is 10.0.
+ The cycle that control auto trim interval (in secends), default is 10.0.
  
  @discussion There is a timer task whick checks its limits and remove expire key-value pairs.
  Set 0.0 to stop the timer task, generally there is no need to stop auto trim.
@@ -56,7 +57,8 @@ typedef void (^CZMemCacheCallBack)(CZMemoryCache *cache);
 /**
  Switch to control whether objects release on main thread or on background thread, default is NO.
  
- @discussion If you set objects which should be release on main thread (e.g. UIView), you should set this switch to YES.
+ @discussion If you set objects which should be release on main thread (e.g. UIView), you should 
+             set this switch to YES.
  */
 @property (assign) BOOL releaseOnMainThread;
 

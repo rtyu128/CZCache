@@ -1,7 +1,7 @@
 //
 //  CZKVStore.m
 //  CZCache
-//
+//  https://github.com/rtyu128/CZCache
 //  Created by Anchor on 16/6/14.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
@@ -59,7 +59,7 @@ static NSString *const kValueFileTrashDirectoryName = @"asshole";
 }
 
 
-#pragma mark - File Support
+#pragma mark - File Operation
 
 - (BOOL)cacheWriteData:(NSData *)data toFile:(NSString *)filename
 {

@@ -1,7 +1,7 @@
 //
 //  CZMemoryCache.m
 //  CZCache
-//
+//  https://github.com/rtyu128/CZCache
 //  Created by Anchor on 16/5/20.
 //  Copyright © 2016年 Anchor. All rights reserved.
 //
@@ -186,7 +186,7 @@ static const NSTimeInterval kMCDefaultAutoTrimInterval = 10.0;
 
 - (void)setObject:(nullable id)object forKey:(id)key
 {
-    [self setObject:object forKey:key lifeTime:0];
+    [self setObject:object forKey:key lifeTime:CZ_LIVE_FOREVER];
 }
 
 - (void)setObject:(id)object forKey:(id)key lifeTime:(NSTimeInterval)lifetime
